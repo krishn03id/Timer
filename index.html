@@ -3,317 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL LINK V4.0</title>
+    <title>NEURAL FLOW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
-        /* === CORE SYSTEM === */
+        /* === CORE AESTHETICS === */
+        :root {
+            --bg: #0a0a0a;
+            --surface: #161616;
+            --primary: #ffffff;
+            --accent: #3b82f6; /* Soft Blue */
+            --glass: rgba(255, 255, 255, 0.05);
+            --blur: 20px;
+        }
+
         body {
             margin: 0;
-            background-color: #000;
-            color: #0f0;
-            font-family: 'Segoe UI', Roboto, monospace;
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
         }
 
-        /* === LEFT SIDE: OPTIC NERVE (CAMERA) === */
-        #optic-feed {
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* === SPLIT LAYOUT === */
+        #view-camera {
             flex: 1;
             position: relative;
-            background: #111;
-            border-right: 2px solid #333;
+            background: #000;
             overflow: hidden;
         }
 
-        #webcam {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1); /* Mirror Mode */
-            opacity: 0.6;
-            transition: opacity 0.5s;
-        }
-        
-        /* The "Smart" Grid Overlay */
-        .hud-grid {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
-        }
-
-        .rec-tag {
-            position: absolute; top: 20px; left: 20px;
-            background: rgba(0,0,0,0.8); color: #555;
-            padding: 5px 15px; border: 1px solid #333;
-            border-radius: 4px; font-weight: bold; font-size: 0.8rem;
-        }
-        .recording { color: red; border-color: red; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-
-        /* === RIGHT SIDE: CORTEX (CONTROLS) === */
-        #cortex-hud {
+        #view-controls {
             flex: 1;
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
-            background: #050505;
+            background: var(--surface);
+            backdrop-filter: blur(50px);
         }
 
-        /* WebGL/Canvas Container */
-        #canvas-container {
-            position: relative;
-            width: 300px; height: 300px;
+        /* === CAMERA FEED === */
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            opacity: 0.8;
+            filter: grayscale(20%) contrast(1.1); /* Cinematic Look */
+        }
+
+        .rec-badge {
+            position: absolute;
+            top: 30px; left: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 6px;
         }
         
-        /* The Text inside the ring */
-        #timer-display {
+        .rec-dot { width: 8px; height: 8px; background: #000; border-radius: 50%; }
+        .recording .rec-dot { background: #ff3b30; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* === THE HUD (Minimalist) === */
+        #canvas-wrapper {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin-bottom: 40px;
+        }
+
+        /* The Timer Text */
+        #timer-text {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 4rem;
-            font-weight: 900;
-            color: white;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            font-size: 5rem;
+            font-weight: 300; /* Ultra Thin */
+            letter-spacing: -2px;
+            font-variant-numeric: tabular-nums;
         }
 
-        #phase-label {
-            margin-top: 20px;
-            font-size: 2rem;
-            text-transform: uppercase;
-            font-weight: 900;
-            letter-spacing: 2px;
-            text-align: center;
+        #phase-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            opacity: 0.9;
         }
-        
+
         #phase-sub {
-            color: #888;
+            font-size: 0.9rem;
+            opacity: 0.5;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        /* === BUTTONS (Glassmorphism) === */
+        .glass-btn {
+            margin-top: 50px;
+            padding: 18px 40px;
             font-size: 1rem;
-            margin-top: 5px;
-            text-align: center;
-        }
-
-        /* Buttons */
-        .cyber-btn {
-            margin-top: 40px;
-            padding: 20px 40px;
-            font-size: 1.2rem;
-            background: transparent;
-            color: #0f0;
-            border: 2px solid #0f0;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 30px;
             cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
-            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, background 0.2s;
+            font-weight: 500;
         }
-        .cyber-btn:hover { background: rgba(0,255,0,0.1); box-shadow: 0 0 25px rgba(0,255,0,0.5); }
-        
-        #startBtn { display: none; background: #0f0; color: #000; }
-        #dlBtn { display: none; border-color: #0af; color: #0af; }
 
-        /* Mobile Layout */
+        .glass-btn:active { transform: scale(0.96); }
+        .glass-btn:hover { background: rgba(255,255,255,0.1); }
+        
+        #btn-start { display: none; background: white; color: black; font-weight: 800; border: none; }
+        #btn-dl { display: none; background: #3b82f6; border: none; }
+
+        /* Mobile Fix */
         @media (max-width: 800px) {
             body { flex-direction: column; }
-            #optic-feed { height: 40vh; border-right: none; border-bottom: 2px solid #333; }
-            #cortex-hud { height: 60vh; }
-            #canvas-container { width: 220px; height: 220px; }
-            #timer-display { font-size: 3rem; }
+            #view-camera { height: 45vh; border-radius: 0 0 30px 30px; z-index: 2; }
+            #view-controls { height: 55vh; margin-top: -30px; padding-top: 40px; }
+            #timer-text { font-size: 4rem; }
+            #canvas-wrapper { width: 260px; height: 260px; margin-bottom: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="optic-feed">
-        <div class="hud-grid"></div>
-        <div class="rec-tag" id="rec-status">● REC OFFLINE</div>
+    <div id="view-camera">
+        <div class="rec-badge" id="rec-ui">
+            <div class="rec-dot"></div>
+            <span id="rec-text">STANDBY</span>
+        </div>
         <video id="webcam" autoplay playsinline muted></video>
     </div>
 
-    <div id="cortex-hud">
+    <div id="view-controls">
         
-        <div id="canvas-container">
-            <canvas id="neuralRing" width="300" height="300"></canvas>
-            <div id="timer-display">00:00</div>
+        <div id="canvas-wrapper">
+            <canvas id="flowRing" width="320" height="320"></canvas>
+            <div id="timer-text">00:00</div>
         </div>
 
-        <div id="phase-label">SYSTEM LOCKED</div>
-        <div id="phase-sub">Awaiting Neural Uplink...</div>
+        <div id="phase-title">LOCKED</div>
+        <div id="phase-sub">Waiting for sensor permission</div>
 
-        <button class="cyber-btn" id="permBtn" onclick="uplinkCamera()">ESTABLISH UPLINK (CAMERA)</button>
-        <button class="cyber-btn" id="startBtn" onclick="initProtocol()">INITIATE PROTOCOL</button>
-        <button class="cyber-btn" id="dlBtn" onclick="downloadData()">DOWNLOAD DATA</button>
+        <button class="glass-btn" id="btn-perm" onclick="requestAccess()">Connect Camera</button>
+        <button class="glass-btn" id="btn-start" onclick="beginSession()">Start Flow</button>
+        <button class="glass-btn" id="btn-dl" onclick="saveSession()">Save Recording</button>
+
     </div>
 
     <script>
-        // === 1. SMART VISUALS (CANVAS) ===
-        const canvas = document.getElementById('neuralRing');
+        // === 1. SMOOTH RENDER ENGINE ===
+        const canvas = document.getElementById('flowRing');
         const ctx = canvas.getContext('2d');
-        let ringColor = '#0f0';
-        let progress = 1.0; // 1.0 = Full, 0.0 = Empty
+        let currentProgress = 1; // 0 to 1
+        let targetProgress = 1;
+        let ringColor = '#ffffff';
 
-        function drawRing() {
+        function render() {
+            // Clear
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            const radius = 130;
+            const r = 140;
 
-            // Background Track
+            // Smooth Interpolation (High FPS feel)
+            currentProgress += (targetProgress - currentProgress) * 0.1;
+
+            // Background Track (Thin Grey)
             ctx.beginPath();
-            ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 15;
+            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.lineWidth = 4;
             ctx.stroke();
 
-            // Active Arc
+            // Active Progress Ring (Round Caps)
             ctx.beginPath();
-            // Start at top (-90deg)
-            ctx.arc(cx, cy, radius, -0.5 * Math.PI, (-0.5 * Math.PI) + (2 * Math.PI * progress));
+            ctx.arc(cx, cy, r, -0.5 * Math.PI, (-0.5 * Math.PI) + (2 * Math.PI * currentProgress));
             ctx.strokeStyle = ringColor;
-            ctx.lineWidth = 15;
-            ctx.lineCap = 'round';
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = ringColor;
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round'; // Smooth ends
             ctx.stroke();
-            ctx.shadowBlur = 0; // Reset shadow
-        }
 
-        // Animation Loop
-        function animate() {
-            drawRing();
-            requestAnimationFrame(animate);
+            requestAnimationFrame(render);
         }
-        animate(); // Start rendering immediately
+        render(); // Start Loop
 
         // === 2. CAMERA & RECORDING ===
         let mediaRecorder;
-        let recordedChunks = [];
-        let videoURL;
+        let chunks = [];
+        let blobUrl;
 
-        async function uplinkCamera() {
+        async function requestAccess() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 document.getElementById('webcam').srcObject = stream;
-                document.getElementById('webcam').style.opacity = "1";
                 
-                // Unlock UI
-                document.getElementById('permBtn').style.display = 'none';
-                document.getElementById('startBtn').style.display = 'inline-block';
-                document.getElementById('phase-label').innerText = "SYSTEM READY";
-                document.getElementById('phase-sub').innerText = "Neural connection stable.";
+                // UI Transition
+                document.getElementById('btn-perm').style.display = 'none';
+                document.getElementById('btn-start').style.display = 'block';
+                document.getElementById('phase-title').innerText = "READY";
+                document.getElementById('phase-sub').innerText = "Position yourself in frame";
 
-                // Prep Recorder
-                setupRecorder(stream);
-                
+                // Setup Recorder
+                setupRec(stream);
             } catch (err) {
-                alert("ACCESS DENIED. Check browser permissions settings.");
+                alert("Please check browser permissions.");
             }
         }
 
-        function setupRecorder(stream) {
-            const options = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') 
+        function setupRec(stream) {
+            const opts = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') 
                 ? { mimeType: 'video/webm; codecs=vp9' } 
                 : { mimeType: 'video/webm' };
-            
-            mediaRecorder = new MediaRecorder(stream, options);
-            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder = new MediaRecorder(stream, opts);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
             mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                videoURL = URL.createObjectURL(blob);
-                document.getElementById('dlBtn').style.display = 'inline-block';
-                document.getElementById('phase-sub').innerText = "Session Recorded. Save Data.";
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                blobUrl = URL.createObjectURL(blob);
+                document.getElementById('btn-dl').style.display = 'block';
+                document.getElementById('rec-ui').classList.remove('recording');
+                document.getElementById('rec-text').innerText = "SAVED";
             };
         }
 
-        // === 3. AUDIO ENGINE ===
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function beep(type) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            const now = audioCtx.currentTime;
-            if(type === 'high') { osc.type = 'square'; osc.frequency.setValueAtTime(880, now); } 
-            else { osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); }
-            
-            osc.start(now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-            osc.stop(now + 0.3);
-        }
-
-        // === 4. PROTOCOL LOGIC ===
-        const schedule = [
-            { type: 'warmup', dur: 240, label: "WARM UP", sub: "Jog / Jacks / Stretch", color: '#0af' }, // Blue
-            // 12 Rounds injected below
-            { type: 'cooldown', dur: 120, label: "COOLDOWN", sub: "Walk & Breathe", color: '#fa0' }, // Orange
-            { type: 'focus', dur: 120, label: "VISUALIZE", sub: "Stillness", color: '#a0f' } // Purple
+        // === 3. LOGIC ENGINE ===
+        const phases = [
+            { type: 'warmup', dur: 240, title: "Warm Up", sub: "Jog / Jacks / Dynamic Stretch", col: '#3b82f6' }, // Blue
+            // 12 Rounds
+            { type: 'cool', dur: 120, title: "Cooldown", sub: "Walk & Breathe", col: '#f59e0b' }, // Orange
+            { type: 'focus', dur: 120, title: "Visualize", sub: "Stillness & Palace", col: '#8b5cf6' } // Purple
         ];
         
         // Inject HIIT
         for(let i=1; i<=12; i++) {
-            schedule.splice(i*2 - 1, 0, 
-                { type: 'work', dur: 40, label: `WORK ${i}/12`, sub: "MAX INTENSITY", color: '#0f0' }, // Green
-                { type: 'rest', dur: 20, label: "REST", sub: "Recover", color: '#f00' } // Red
+            phases.splice(i*2 - 1, 0, 
+                { type: 'work', dur: 40, title: `Work ${i}/12`, sub: "Max Intensity", col: '#10b981' }, // Green
+                { type: 'rest', dur: 20, title: "Rest", sub: "Recover", col: '#ef4444' } // Red
             );
         }
 
-        let currentPhase = 0;
+        let phaseIdx = 0;
         let timeLeft = 0;
-        let timerInt = null;
+        let timerRef = null;
 
-        function initProtocol() {
-            document.getElementById('startBtn').style.display = 'none';
-            
+        // Beep Sound
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(freq = 880) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function beginSession() {
             // Fullscreen
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-
-            // Start Rec
-            if (mediaRecorder && mediaRecorder.state === "inactive") {
+            if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            
+            // UI Update
+            document.getElementById('btn-start').style.display = 'none';
+            
+            // Rec Start
+            if(mediaRecorder.state === "inactive") {
                 mediaRecorder.start();
-                const recTag = document.getElementById('rec-status');
-                recTag.innerText = "● REC LIVE";
-                recTag.classList.add('recording');
+                document.getElementById('rec-ui').classList.add('recording');
+                document.getElementById('rec-text').innerText = "REC";
             }
 
-            beep('high');
-            currentPhase = 0;
+            phaseIdx = 0;
             runPhase();
         }
 
         function runPhase() {
-            if (currentPhase >= schedule.length) { finish(); return; }
-
-            const stage = schedule[currentPhase];
-            timeLeft = stage.dur;
+            if(phaseIdx >= phases.length) { finish(); return; }
             
-            // UI Updates
-            ringColor = stage.color;
-            document.getElementById('phase-label').innerText = stage.label;
-            document.getElementById('phase-label').style.color = stage.color;
-            document.getElementById('phase-sub').innerText = stage.sub;
+            const p = phases[phaseIdx];
+            timeLeft = p.dur;
             
-            if(stage.type === 'work' || stage.type === 'focus') beep('high');
-            else beep('low');
+            // Update UI
+            document.getElementById('phase-title').innerText = p.title;
+            document.getElementById('phase-sub').innerText = p.sub;
+            ringColor = p.col;
+            
+            beep(p.type === 'work' ? 880 : 440);
 
-            clearInterval(timerInt);
-            timerInt = setInterval(() => {
-                // Update Canvas Data
-                progress = timeLeft / stage.dur;
+            clearInterval(timerRef);
+            timerRef = setInterval(() => {
+                // Update Logic
+                targetProgress = timeLeft / p.dur;
                 
-                // Update Text
+                // Format Time
                 const m = Math.floor(timeLeft / 60);
                 const s = timeLeft % 60;
-                document.getElementById('timer-display').innerText = `${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
+                document.getElementById('timer-text').innerText = `${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
 
-                if (timeLeft <= 0) {
-                    currentPhase++;
+                if(timeLeft <= 0) {
+                    phaseIdx++;
                     runPhase();
                 } else {
                     timeLeft--;
@@ -322,27 +328,22 @@
         }
 
         function finish() {
-            clearInterval(timerInt);
+            clearInterval(timerRef);
             if(mediaRecorder.state === "recording") mediaRecorder.stop();
-            
-            document.getElementById('phase-label').innerText = "COMPLETE";
-            document.getElementById('phase-sub').innerText = "Go to Cold Shower.";
-            document.getElementById('timer-display').innerText = "DONE";
-            ringColor = '#fff';
-            progress = 1;
-            beep('high');
+            document.getElementById('phase-title').innerText = "Session Complete";
+            document.getElementById('phase-sub').innerText = "Go to Cold Shower";
+            targetProgress = 0;
+            beep(1000);
         }
 
-        function downloadData() {
+        function saveSession() {
             const a = document.createElement('a');
             a.style.display = 'none';
-            a.href = videoURL;
-            a.download = `neural_session_${new Date().getTime()}.webm`;
+            a.href = blobUrl;
+            a.download = `flow_session_${Date.now()}.webm`;
             document.body.appendChild(a);
             a.click();
-            setTimeout(() => { document.body.removeChild(a); }, 100);
         }
-
     </script>
 </body>
 </html>
