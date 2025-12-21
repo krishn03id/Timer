@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEURAL RECORDER V3.0</title>
+    <style>
+        /* === SYSTEM CORE === */
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            width: 100vw;
+            background-color: #000;
+            color: white;
+            overflow: hidden;
+            display: flex;
+            flex-direction: row; /* Default: Split Screen */
+        }
+
+        /* === LEFT PANEL: CAMERA & RECORDER === */
+        #cam-panel {
+            flex: 1;
+            position: relative;
+            background: #111;
+            overflow: hidden;
+            border-right: 3px solid rgba(255,255,255,0.2);
+        }
+
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror Effect */
+        }
+
+        .rec-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 50px;
+            z-index: 10;
+        }
+
+        .rec-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #555; /* Gray when off */
+            border-radius: 50%;
+        }
+
+        .recording .rec-dot {
+            background-color: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+            animation: pulse 1s infinite;
+        }
+
+        .rec-text { font-family: monospace; font-weight: bold; font-size: 0.9rem; color: #aaa; }
+        .recording .rec-text { color: white; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* === RIGHT PANEL: TIMER HUD === */
+        #interface-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: #000;
+            position: relative;
+            transition: background-color 0.4s ease;
+        }
+
+        /* Progress & Clock */
+        #progress-container {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.1);
+            position: absolute; top: 0; left: 0;
+        }
+        #progress-fill { height: 100%; background: #fff; width: 0%; transition: width 1s linear; }
+        
+        #realTimeDisplay {
+            position: absolute; top: 20px; right: 20px;
+            font-family: monospace; font-weight: bold; font-size: 1.2rem;
+        }
+
+        /* The Timer Ring */
+        .timer-ring {
+            width: 35vh; height: 35vh;
+            border-radius: 50%;
+            border: 8px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.3);
+            margin-top: 40px;
+        }
+
+        #timer { font-size: 6rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+        /* Status Text */
+        #status-area { text-align: center; margin-bottom: auto; margin-top: 30px; }
+        #phase-name { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; margin: 0; }
+        #phase-sub { font-size: 1.2rem; color: rgba(255,255,255,0.7); margin-top: 10px; }
+
+        /* Buttons */
+        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center; padding-bottom: 20px; }
+        
+        button {
+            padding: 20px 40px; font-size: 1.2rem; border: none; border-radius: 50px;
+            font-weight: 900; text-transform: uppercase; cursor: pointer; width: 80%;
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.98); }
+
+        #permBtn { background: #3498db; color: white; }
+        #startBtn { background: white; color: black; display: none; } /* Hidden until permission granted */
+        #downloadBtn { background: #27ae60; color: white; display: none; }
+
+        /* === RESPONSIVE FOR PHONE === */
+        @media (max-aspect-ratio: 1/1) {
+            body { flex-direction: column; }
+            #cam-panel { height: 40%; border-right: none; border-bottom: 3px solid rgba(255,255,255,0.2); }
+            #interface-panel { height: 60%; }
+            .timer-ring { width: 25vh; height: 25vh; }
+            #timer { font-size: 4rem; }
+        }
+
+        /* === PHASE COLORS === */
+        #interface-panel.warmup { background-color: #2980b9; }
+        #interface-panel.work { background-color: #27ae60; }
+        #interface-panel.rest { background-color: #c0392b; }
+        #interface-panel.cooldown { background-color: #d35400; }
+        #interface-panel.focus { background-color: #8e44ad; }
+        #interface-panel.finished { background-color: #000; }
+
+    </style>
+</head>
+<body>
+
+    <div id="cam-panel">
+        <div class="rec-indicator" id="rec-badge">
+            <div class="rec-dot"></div>
+            <div class="rec-text">REC STANDBY</div>
+        </div>
+        <video id="webcam" autoplay playsinline muted></video>
+    </div>
+
+    <div id="interface-panel">
+        <div id="progress-container"><div id="progress-fill"></div></div>
+        <div id="realTimeDisplay">00:00</div>
+
+        <div class="timer-ring">
+            <div id="timer">00:00</div>
+        </div>
+
+        <div id="status-area">
+            <h1 id="phase-name">SYSTEM LOCKED</h1>
+            <div id="phase-sub">Camera Permission Required</div>
+        </div>
+
+        <div class="btn-group">
+            <button id="permBtn" onclick="requestPermissions()">ACTIVATE SENSORS</button>
+            <button id="startBtn" onclick="initProtocol()">INITIALIZE PROTOCOL</button>
+            <button id="downloadBtn" onclick="downloadVideo()">SAVE RECORDING</button>
+        </div>
+    </div>
+
+    <script>
+        // === GLOBAL VARIABLES ===
+        let stream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let videoURL = null;
+
+        // === 1. PERMISSION HANDLER ===
+        async function requestPermissions() {
+            try {
+                // Explicitly ask for audio and video
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                
+                // Attach to video element
+                const videoEl = document.getElementById('webcam');
+                videoEl.srcObject = stream;
+                
+                // Unlock the Start Button
+                document.getElementById('permBtn').style.display = 'none';
+                document.getElementById('startBtn').style.display = 'block';
+                document.getElementById('phase-name').innerText = "SYSTEM READY";
+                document.getElementById('phase-sub').innerText = "Camera Active. Press Initialize.";
+                
+                // Prepare Recorder
+                setupRecorder();
+
+            } catch (err) {
+                alert("PERMISSION DENIED: " + err.message + "\n\nIf using a local file, some browsers block camera. Try using Chrome or a local server.");
+                document.getElementById('phase-sub').innerText = "Error: " + err.name;
+            }
+        }
+
+        function setupRecorder() {
+            // Check supported types
+            const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') 
+                             ? 'video/webm; codecs=vp9' 
+                             : 'video/webm';
+            
+            mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                videoURL = URL.createObjectURL(blob);
+                document.getElementById('downloadBtn').style.display = 'block';
+                document.getElementById('phase-sub').innerText = "Workout Complete. Recording Ready.";
+            };
+        }
+
+        // === 2. AUDIO ENGINE ===
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+            if (type === 'high') { osc.type = 'square'; osc.frequency.setValueAtTime(880, now); }
+            else { osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); }
+
+            osc.start(now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.stop(now + 0.3);
+        }
+
+        // === 3. TIMER LOGIC ===
+        const TOTAL_DURATION = 1200; 
+        const schedule = [
+            { type: 'warmup', duration: 240, title: "WARM UP", sub: "Jog / Jacks / Stretch" },
+            { type: 'cooldown', duration: 120, title: "COOLDOWN", sub: "Walk & Box Breathe" },
+            { type: 'focus', duration: 120, title: "VISUALIZE", sub: "Build the Palace" }
+        ];
+
+        let hiitRounds = [];
+        for(let i=1; i<=12; i++) {
+            hiitRounds.push({ type: 'work', duration: 40, title: `WORK ${i}/12`, sub: "MAX INTENSITY" });
+            hiitRounds.push({ type: 'rest', duration: 20, title: "REST", sub: "Recover" });
+        }
+        schedule.splice(1, 0, ...hiitRounds);
+
+        let currentPhase = 0;
+        let timeLeft = 0;
+        let elapsedTotal = 0;
+        let timerInterval = null;
+
+        function updateClock() {
+            document.getElementById('realTimeDisplay').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        function initProtocol() {
+            // Fullscreen
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+
+            document.getElementById('startBtn').style.display = 'none';
+            
+            // Start Recording
+            if (mediaRecorder && mediaRecorder.state === "inactive") {
+                mediaRecorder.start();
+                document.getElementById('rec-badge').classList.add('recording');
+                document.querySelector('.rec-text').innerText = "REC [ON AIR]";
+            }
+
+            beep('high');
+            currentPhase = 0;
+            runPhase();
+        }
+
+        function runPhase() {
+            if (currentPhase >= schedule.length) {
+                finish(); return;
+            }
+            const stage = schedule[currentPhase];
+            timeLeft = stage.duration;
+            
+            document.getElementById('interface-panel').className = stage.type;
+            document.getElementById('phase-name').innerText = stage.title;
+            document.getElementById('phase-sub').innerText = stage.sub;
+
+            if(stage.type === 'work' || stage.type === 'focus') beep('high');
+            else beep('low');
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
+
+                let percent = ((elapsedTotal + (stage.duration - timeLeft)) / TOTAL_DURATION) * 100;
+                document.getElementById('progress-fill').style.width = percent + "%";
+
+                if (timeLeft <= 0) {
+                    elapsedTotal += stage.duration;
+                    currentPhase++;
+                    runPhase();
+                } else {
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function finish() {
+            clearInterval(timerInterval);
+            
+            // Stop Recording
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                document.getElementById('rec-badge').classList.remove('recording');
+                document.querySelector('.rec-text').innerText = "REC STOPPED";
+            }
+
+            document.getElementById('interface-panel').className = 'finished';
+            document.getElementById('timer').innerText = "DONE";
+            document.getElementById('phase-name').innerText = "COMPLETE";
+            beep('high');
+        }
+
+        function downloadVideo() {
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = videoURL;
+            a.download = 'neural_workout_' + new Date().toISOString().slice(0,10) + '.webm';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(videoURL);
+            }, 100);
+        }
+
+    </script>
+</body>
+</html>
