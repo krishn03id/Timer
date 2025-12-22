@@ -3,297 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V11</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW V12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
-        /* === LIQUID UI ENGINE === */
+        /* === V12 LIQUID ENGINE === */
         :root {
-            --glass-surface: rgba(20, 20, 20, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-highlight: rgba(255, 255, 255, 0.05);
-            --accent: #2997ff; /* Apple Blue */
-            --text-main: #f5f5f7;
-            --text-sub: #86868b;
-            --blur: 50px;
+            --bg-deep: #000000;
+            --glass: rgba(30, 30, 30, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shine: rgba(255, 255, 255, 0.05);
+            --accent: #0a84ff;
+            --text-main: #ffffff;
+            --blur: 40px;
         }
 
         body {
-            margin: 0;
-            background: #000;
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            opacity: 0;
-            animation: fadeIn 1.5s ease forwards;
+            margin: 0; background: var(--bg-deep); color: var(--text-main);
+            font-family: 'Inter', sans-serif; height: 100vh; width: 100vw;
+            overflow: hidden; display: flex; opacity: 0; animation: fadeOn 1s ease forwards;
+            -webkit-tap-highlight-color: transparent; /* Remove mobile highlight box */
         }
-        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes fadeOn { to { opacity: 1; } }
 
-        /* === FLUID BACKGROUND ANIMATION === */
-        .aurora-bg {
-            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 70%);
-            z-index: 0;
+        /* === FLUID BACKGROUND (LOCKED) === */
+        #fluid-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none; /* CLICK THROUGH SAFE */
+            background: radial-gradient(circle at 50% 50%, #111 0%, #000 80%);
         }
-        .orb {
-            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
-            animation: float 20s infinite ease-in-out;
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.4;
+            animation: drift 20s infinite ease-in-out;
         }
-        .orb-1 { top: 20%; left: 30%; width: 600px; height: 600px; background: #0044ff; animation-delay: 0s; }
-        .orb-2 { bottom: 20%; right: 30%; width: 500px; height: 500px; background: #ff0055; animation-delay: -5s; }
-        @keyframes float { 0% { transform: translate(0,0); } 50% { transform: translate(30px, -50px); } 100% { transform: translate(0,0); } }
+        .b1 { width: 600px; height: 600px; background: #0040ff; top: -10%; left: -10%; }
+        .b2 { width: 500px; height: 500px; background: #ff0050; bottom: -10%; right: -10%; animation-delay: -5s; }
+        @keyframes drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px, -40px); } }
 
-        /* === MAIN LAYOUT === */
-        #container {
-            position: relative; z-index: 10;
-            display: flex; width: 100%; height: 100%;
-            backdrop-filter: blur(0px); /* Performance fix */
+        /* === LAYOUT === */
+        #app-grid {
+            display: flex; width: 100%; height: 100%; z-index: 10;
         }
 
-        /* LEFT: CAMERA ZONE */
-        #zone-visual {
+        /* LEFT: VISUALS */
+        #col-visual {
             flex: 1; position: relative; margin: 20px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 30px; border: 1px solid var(--glass-border);
-            overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4); border-radius: 30px;
+            border: 1px solid var(--glass-border); overflow: hidden;
             display: flex; align-items: center; justify-content: center;
         }
-        
         #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         
-        #pulse-visual {
-            width: 250px; height: 250px; border-radius: 50%;
-            border: 2px solid var(--accent);
+        #pulse-ring {
+            width: 200px; height: 200px; border-radius: 50%;
+            border: 4px solid var(--accent);
             box-shadow: 0 0 50px var(--accent);
-            animation: pulse 3s infinite;
-            display: none;
+            animation: pulse 3s infinite; display: none;
         }
-        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.5; } }
 
-        /* RIGHT: CONTROL GLASS */
-        #zone-control {
+        /* RIGHT: CONTROLS */
+        #col-control {
             flex: 1; margin: 20px 20px 20px 0;
-            background: var(--glass-surface);
-            backdrop-filter: blur(var(--blur));
-            border-radius: 30px;
-            border: 1px solid var(--glass-border);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: var(--glass); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+            border-radius: 30px; border: 1px solid var(--glass-border);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        /* === UI COMPONENTS === */
+        /* === BUTTONS & UI === */
+        .glass-panel { width: 100%; max-width: 400px; padding: 30px; box-sizing: border-box; }
         
-        /* Streak Capsule */
-        .streak-capsule {
-            position: absolute; top: 30px; left: 30px;
-            background: rgba(0,0,0,0.5); padding: 10px 18px;
-            border-radius: 100px; border: 1px solid var(--glass-border);
-            display: flex; gap: 10px; align-items: center;
-            backdrop-filter: blur(20px); z-index: 20;
-        }
-        .streak-txt { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px; }
-        .dot-grid { display: flex; gap: 4px; }
-        .dot { width: 6px; height: 6px; background: #444; border-radius: 50%; }
-        .dot.active { background: #32d74b; box-shadow: 0 0 8px #32d74b; }
-
-        /* Manual Button */
-        #btn-info {
-            position: absolute; top: 30px; right: 30px;
-            width: 40px; height: 40px; border-radius: 50%;
-            background: var(--glass-highlight); border: 1px solid var(--glass-border);
-            color: #fff; font-weight: 600; cursor: pointer;
-            z-index: 50; transition: all 0.2s;
-        }
-        #btn-info:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
-
-        /* Panels */
-        .panel { width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; }
-        .panel.active { display: flex; animation: slideIn 0.5s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Setup Inputs */
-        .setup-row {
-            width: 100%; max-width: 320px; margin-bottom: 25px;
-        }
-        .row-label {
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px;
-            color: var(--text-sub); margin-bottom: 12px; font-weight: 700;
-        }
-        .seg-control {
-            display: flex; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 14px;
-        }
-        .seg-btn {
-            flex: 1; padding: 12px; text-align: center;
-            font-size: 0.9rem; font-weight: 500; color: #888;
-            border-radius: 10px; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
-        }
-        .seg-btn.selected {
-            background: #444; color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        /* Proper Button Tags for better touch */
+        .opt-group { margin-bottom: 25px; }
+        .opt-label { 
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; 
+            color: #888; margin-bottom: 10px; font-weight: 700; 
         }
         
-        /* Main Action Button */
-        .hero-btn {
-            background: var(--text-main); color: #000;
-            padding: 20px 60px; border-radius: 100px;
-            font-size: 1.1rem; font-weight: 800; border: none;
-            cursor: pointer; margin-top: 20px;
+        .toggle-box {
+            display: flex; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 16px;
+        }
+        
+        .t-btn {
+            flex: 1; border: none; background: transparent; color: #666;
+            padding: 14px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            border-radius: 12px; transition: all 0.2s; font-family: inherit;
+        }
+        .t-btn.active {
+            background: #333; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .main-btn {
+            width: 100%; padding: 22px; border: none; border-radius: 100px;
+            background: #fff; color: #000; font-size: 1.1rem; font-weight: 800;
+            cursor: pointer; margin-top: 10px; transition: transform 0.1s;
             box-shadow: 0 0 30px rgba(255,255,255,0.1);
-            transition: transform 0.1s;
         }
-        .hero-btn:active { transform: scale(0.95); }
+        .main-btn:active { transform: scale(0.97); }
 
-        /* Timer HUD */
-        #ring-container { position: relative; width: 300px; height: 300px; margin-bottom: 40px; }
-        #timer-display {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 5.5rem; font-weight: 200; font-variant-numeric: tabular-nums;
-            letter-spacing: -3px; text-shadow: 0 0 30px rgba(255,255,255,0.1);
-        }
+        /* HUD STYLES */
+        #hud-view { display: none; flex-direction: column; align-items: center; width: 100%; }
         
-        .phase-card {
-            background: rgba(255,255,255,0.05); padding: 20px 30px;
-            border-radius: 20px; border: 1px solid var(--glass-border);
-            text-align: center; margin-bottom: 30px; width: 80%;
+        #timer-box { position: relative; width: 280px; height: 280px; margin-bottom: 30px; }
+        #timer-txt {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 5rem; font-weight: 200; font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
-        #phase-title { font-size: 1.8rem; font-weight: 800; margin: 0; }
-        #phase-desc { color: var(--text-sub); margin-top: 8px; font-size: 1rem; }
 
-        .control-grid { display: flex; gap: 15px; width: 80%; }
-        .ctrl-btn {
-            flex: 1; padding: 18px; background: rgba(255,255,255,0.1);
-            border: 1px solid var(--glass-border); color: #fff;
-            border-radius: 16px; font-weight: 600; cursor: pointer;
-            transition: background 0.2s;
+        #phase-txt { font-size: 2rem; font-weight: 800; margin: 0; text-align: center; }
+        #phase-sub { color: #888; margin-top: 5px; margin-bottom: 30px; font-size: 1.1rem; }
+
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 85%; }
+        .sub-btn {
+            padding: 18px; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
+            color: #fff; border-radius: 16px; font-weight: 600; cursor: pointer; border: none; font-size: 1rem;
         }
-        .ctrl-btn:hover { background: rgba(255,255,255,0.2); }
-        .finish { color: #ff453a; background: rgba(255, 69, 58, 0.1); }
+        .finish-btn { background: rgba(255, 69, 58, 0.15); color: #ff453a; }
 
         /* === INFO MODAL === */
-        #modal-overlay {
+        #modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px);
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             z-index: 100; display: none; align-items: center; justify-content: center;
         }
-        .glass-modal {
-            width: 90%; max-width: 450px;
-            background: #1c1c1e; border: 1px solid var(--glass-border);
-            border-radius: 24px; padding: 30px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-            animation: popUp 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+        .modal-card {
+            background: #1c1c1e; width: 90%; max-width: 450px; padding: 30px;
+            border-radius: 24px; border: 1px solid var(--glass-border);
+            box-shadow: 0 50px 100px #000;
         }
-        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .warn { 
+            background: rgba(255, 69, 58, 0.1); color: #ff453a; padding: 15px; 
+            border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-top: 20px;
+        }
 
-        .modal-h { font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; }
-        .modal-p { font-size: 0.95rem; line-height: 1.6; color: #a1a1aa; margin-bottom: 15px; }
-        .warning-box {
-            background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.3);
-            color: #ff453a; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;
+        /* Streak Corner */
+        .streak-tag {
+            position: absolute; top: 20px; left: 20px; z-index: 50;
+            background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px;
+            font-weight: 700; font-size: 0.9rem; backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+        }
+        
+        #btn-q {
+            position: absolute; top: 20px; right: 20px; width: 40px; height: 40px;
+            border-radius: 50%; border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;
+            cursor: pointer; z-index: 50;
         }
 
         /* Mobile */
         @media (max-width: 900px) {
             body { overflow-y: auto; }
-            #container { flex-direction: column; }
-            #zone-visual { height: 40vh; margin: 10px; border-radius: 20px; }
-            #zone-control { height: 60vh; margin: 0 10px 10px 10px; border-radius: 20px; }
-            #ring-container { width: 220px; height: 220px; margin-bottom: 20px; }
-            #timer-display { font-size: 4rem; }
+            #app-grid { flex-direction: column; }
+            #col-visual { height: 40vh; margin: 10px; border-radius: 24px; }
+            #col-control { height: 60vh; margin: 0 10px 10px 10px; border-radius: 24px; justify-content: flex-start; padding-top: 20px; }
+            #timer-box { width: 200px; height: 200px; margin-bottom: 20px; }
+            #timer-txt { font-size: 3.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="aurora-bg">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
+    <div id="fluid-bg">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
     </div>
 
-    <div id="modal-overlay">
-        <div class="glass-modal">
-            <div class="modal-h">Neural Flow v11</div>
-            <div class="modal-p">
-                This protocol uses <b>High-Intensity Interval Training</b> to maximize BDNF production. This protein acts as fertilizer for your brain's memory centers.
-            </div>
-            <div class="modal-p">
-                <b>The Rule:</b> Do not stop until the timer hits zero. Shake, sweat, and push to failure.
-            </div>
-            <div class="warning-box">
-                ⚠ CAUTION: Clearing your browser cache/history will DELETE your streak permanently.
-            </div>
-            <button class="hero-btn" style="width:100%; margin-top:20px; font-size:1rem; padding:15px;" onclick="toggleModal(false)">I Understand</button>
+    <div id="modal">
+        <div class="modal-card">
+            <h2 style="margin:0 0 10px 0;">Neural Flow v12</h2>
+            <p style="color:#aaa; line-height:1.5;">High-Intensity Protocol designed for BDNF production. Push to failure safely.</p>
+            <div class="warn">⚠ STREAK WARNING: Clearing browser cache will delete your progress.</div>
+            <button class="main-btn" onclick="closeModal()">I Understand</button>
         </div>
     </div>
 
-    <div id="container">
+    <div id="app-grid">
         
-        <div id="zone-visual">
-            <div class="streak-capsule">
-                <span class="streak-txt">🔥 <span id="streak-num">0</span></span>
-                <div class="dot-grid" id="streak-dots"></div>
-            </div>
+        <div id="col-visual">
+            <div class="streak-tag">🔥 <span id="s-val">0</span></div>
             <video id="webcam" autoplay playsinline muted></video>
-            <div id="pulse-visual"></div>
+            <div id="pulse-ring"></div>
         </div>
 
-        <div id="zone-control">
-            
-            <button id="btn-info" onclick="toggleModal(true)">?</button>
+        <div id="col-control">
+            <button id="btn-q" onclick="openModal()">?</button>
 
-            <div id="panel-setup" class="panel active">
-                <h1 style="margin-bottom: 5px;">Ready for Uplink</h1>
-                <p style="color: var(--text-sub); margin-top:0; margin-bottom: 40px;">Configure session parameters.</p>
+            <div id="setup-view" class="glass-panel">
+                <h1 style="margin:0 0 5px 0;">System Ready</h1>
+                <p style="color:#666; margin:0 0 30px 0;">Configure session parameters.</p>
 
-                <div class="setup-row">
-                    <div class="row-label">Visual Sensor</div>
-                    <div class="seg-control">
-                        <div class="seg-btn selected" onclick="updateSet('cam', true, this)">Camera On</div>
-                        <div class="seg-btn" onclick="updateSet('cam', false, this)">No Camera</div>
+                <div class="opt-group">
+                    <div class="opt-label">Input Source</div>
+                    <div class="toggle-box">
+                        <button class="t-btn active" onclick="setOpt('cam', true, this)">Camera</button>
+                        <button class="t-btn" onclick="setOpt('cam', false, this)">No Cam</button>
                     </div>
                 </div>
 
-                <div class="setup-row">
-                    <div class="row-label">Biological Status</div>
-                    <div class="seg-control">
-                        <div class="seg-btn selected" onclick="updateSet('mode', 'fresh', this)">⚡ Fresh</div>
-                        <div class="seg-btn" onclick="updateSet('mode', 'sore', this)">🩹 Sore</div>
+                <div class="opt-group">
+                    <div class="opt-label">Condition</div>
+                    <div class="toggle-box">
+                        <button class="t-btn active" onclick="setOpt('mode', 'fresh', this)">⚡ Fresh</button>
+                        <button class="t-btn" onclick="setOpt('mode', 'sore', this)">🩹 Sore</button>
                     </div>
                 </div>
 
-                <div class="setup-row">
-                    <div class="row-label">Data Quality</div>
-                    <div class="seg-control">
-                        <div class="seg-btn selected" onclick="updateSet('qual', 'high', this)">High Res</div>
-                        <div class="seg-btn" onclick="updateSet('qual', 'low', this)">Low Res</div>
-                    </div>
-                </div>
-
-                <button class="hero-btn" onclick="initSession()">INITIALIZE</button>
+                <button class="main-btn" onclick="startSession()">START SESSION</button>
             </div>
 
-            <div id="panel-hud" class="panel">
-                <div id="ring-container">
-                    <canvas id="ring" width="300" height="300"></canvas>
-                    <div id="timer-display">00:00</div>
+            <div id="hud-view" class="glass-panel" style="display:none;">
+                <div id="timer-box">
+                    <canvas id="ring" width="280" height="280"></canvas>
+                    <div id="timer-txt">00:00</div>
                 </div>
 
-                <div class="phase-card">
-                    <div id="phase-title">PREPARE</div>
-                    <div id="phase-desc">Align your body</div>
+                <div id="phase-txt">PREPARE</div>
+                <div id="phase-sub">Get in position</div>
+
+                <div class="action-grid" id="act-btns">
+                    <button class="sub-btn" id="btn-p" onclick="togglePause()">PAUSE</button>
+                    <button class="sub-btn finish-btn" onclick="finishSession()">FINISH</button>
                 </div>
 
-                <div class="control-grid" id="controls-active">
-                    <button class="ctrl-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
-                    <button class="ctrl-btn finish" onclick="finishSession()">FINISH</button>
-                </div>
-
-                <div class="control-grid" id="controls-finish" style="display:none; flex-direction:column;">
-                    <button class="ctrl-btn" id="btn-dl" style="background:var(--accent); display:none;" onclick="saveVideo()">SAVE VIDEO</button>
-                    <button class="ctrl-btn" onclick="window.location.reload()">BACK TO HOME</button>
+                <div class="action-grid" id="fin-btns" style="display:none;">
+                    <button class="sub-btn" id="btn-dl" style="background:#0a84ff; display:none;" onclick="saveVideo()">SAVE</button>
+                    <button class="sub-btn" onclick="location.reload()">HOME</button>
                 </div>
             </div>
 
@@ -301,153 +237,197 @@
     </div>
 
     <script>
-        // === 1. STATE MANAGEMENT ===
+        // === 1. SAFE DATA STORAGE (Crash Proof) ===
         const db = {
-            get: () => ({
-                streak: parseInt(localStorage.getItem('nf11_streak') || 0),
-                history: JSON.parse(localStorage.getItem('nf11_hist') || '[]'),
-                seenIntro: localStorage.getItem('nf11_intro')
-            }),
-            save: (s, h) => {
-                localStorage.setItem('nf11_streak', s);
-                localStorage.setItem('nf11_hist', JSON.stringify(h));
+            read: () => {
+                try {
+                    return {
+                        streak: parseInt(localStorage.getItem('nf12_s') || 0),
+                        seen: localStorage.getItem('nf12_intro')
+                    };
+                } catch(e) {
+                    return { streak: 0, seen: false }; // Fallback if privacy blocks storage
+                }
             },
-            markIntro: () => localStorage.setItem('nf11_intro', 'true')
-        };
-
-        let state = {
-            ...db.get(),
-            config: { cam: true, mode: 'fresh', qual: 'high' },
-            session: { active: false, paused: false, phase: 0, time: 0, elapsed: 0, interval: null }
-        };
-
-        // === 2. UI INITIALIZATION ===
-        function initUI() {
-            // Show modal if first time
-            if(!state.seenIntro) toggleModal(true);
-            
-            // Render Streak
-            document.getElementById('streak-num').innerText = state.streak;
-            const dotContainer = document.getElementById('streak-dots');
-            dotContainer.innerHTML = '';
-            for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(new Date().getDate() - i);
-                const k = d.toISOString().split('T')[0];
-                const dot = document.createElement('div');
-                dot.className = 'dot ' + (state.history.includes(k) ? 'active' : '');
-                dotContainer.appendChild(dot);
+            write: (s) => {
+                try { localStorage.setItem('nf12_s', s); } catch(e) {}
+            },
+            markSeen: () => {
+                try { localStorage.setItem('nf12_intro', 'true'); } catch(e) {}
             }
-        }
-        initUI();
-
-        function toggleModal(show) {
-            document.getElementById('modal-overlay').style.display = show ? 'flex' : 'none';
-            if(!show) db.markIntro();
-        }
-
-        function updateSet(key, val, el) {
-            state.config[key] = val;
-            el.parentElement.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('selected'));
-            el.classList.add('selected');
-        }
-
-        // === 3. EXERCISE DATABASE ===
-        const MOVES = {
-            fresh: [
-                {t:"BURPEES", d:"Chest to floor, jump high"},
-                {t:"MTN CLIMBERS", d:"Drive knees to chest rapidly"},
-                {t:"JUMP SQUATS", d:"Explode up, land softly"},
-                {t:"PLANK JACKS", d:"Core tight, legs in and out"},
-                {t:"HIGH KNEES", d:"Knees above hip level"},
-                {t:"SWITCH LUNGE", d:"Jump switch legs in air"}
-            ],
-            sore: [
-                {t:"DEEP SQUAT", d:"Hold bottom position"},
-                {t:"GLUTE BRIDGE", d:"Squeeze glutes at top"},
-                {t:"CAT COW", d:"Arch and round spine"},
-                {t:"HIP OPENER", d:"Lunge forward, stretch hip"},
-                {t:"CHILD POSE", d:"Sit back on heels"},
-                {t:"THORACIC TWIST", d:"Rotate chest to ceiling"}
-            ]
         };
 
-        // === 4. SYSTEM START ===
+        // State
+        let state = {
+            streak: db.read().streak,
+            config: { cam: true, mode: 'fresh' },
+            active: false, paused: false, phase: 0, time: 0, elapsed: 0, interval: null
+        };
+
+        // Init
+        document.getElementById('s-val').innerText = state.streak;
+        if(!db.read().seen) document.getElementById('modal').style.display = 'flex';
+
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { 
+            document.getElementById('modal').style.display = 'none'; 
+            db.markSeen(); 
+        }
+
+        // === 2. INTERACTION HANDLERS ===
+        function setOpt(key, val, el) {
+            state.config[key] = val;
+            // Visual Toggle
+            let siblings = el.parentElement.children;
+            for(let btn of siblings) btn.classList.remove('active');
+            el.classList.add('active');
+        }
+
+        // === 3. START LOGIC ===
         let mediaRecorder, chunks = [], blobUrl;
 
-        async function initSession() {
-            // 1. Handle Camera
+        async function startSession() {
+            // Handle Camera
             if(state.config.cam) {
                 try {
-                    const constraints = {
-                        video: {
-                            width: state.config.qual === 'high' ? { ideal: 1280 } : { ideal: 640 },
-                            facingMode: 'user'
-                        }
-                    };
-                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
                     document.getElementById('webcam').srcObject = stream;
                     
-                    // Setup Recorder
+                    // Recorder
                     if(MediaRecorder.isTypeSupported('video/webm')) {
-                        mediaRecorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
+                        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
                         mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
                         mediaRecorder.onstop = () => {
-                            const b = new Blob(chunks, {type:'video/webm'});
+                            let b = new Blob(chunks, { type: 'video/webm' });
                             blobUrl = URL.createObjectURL(b);
                             document.getElementById('btn-dl').style.display = 'block';
                         };
                         mediaRecorder.start();
                     }
                 } catch(e) {
-                    alert("Camera blocked. Switching to No-Cam mode.");
+                    alert("Camera blocked or unavailable. Switching to No-Cam mode.");
                     state.config.cam = false;
                 }
             }
 
             if(!state.config.cam) {
                 document.getElementById('webcam').style.display = 'none';
-                document.getElementById('pulse-visual').style.display = 'block';
+                document.getElementById('pulse-ring').style.display = 'block';
             }
 
-            // 2. Switch Panels
-            document.getElementById('panel-setup').classList.remove('active');
-            document.getElementById('panel-hud').classList.add('active');
+            // Switch Screen
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('hud-view').style.display = 'flex';
             if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
 
-            // 3. Start Loop
+            // Start Timer
             buildSchedule();
             runPhase();
         }
 
-        // === 5. WORKOUT LOGIC ===
-        let schedule = [];
+        // === 4. EXERCISE ENGINE ===
+        const EXERCISES = {
+            fresh: [
+                {t:"BURPEES", d:"Chest to floor"}, {t:"MTN CLIMBERS", d:"Drive knees fast"},
+                {t:"JUMP SQUATS", d:"Explode up"}, {t:"PLANK JACKS", d:"Core tight"},
+                {t:"HIGH KNEES", d:"Above hips"}, {t:"LUNGE JUMPS", d:"Switch in air"}
+            ],
+            sore: [
+                {t:"DEEP SQUAT", d:"Hold bottom"}, {t:"GLUTE BRIDGE", d:"Squeeze top"},
+                {t:"CAT COW", d:"Spine mobility"}, {t:"CHILD POSE", d:"Relax back"},
+                {t:"HIP STRETCH", d:"Lunge forward"}, {t:"TWISTS", d:"Gentle rotation"}
+            ]
+        };
 
+        let schedule = [];
         function buildSchedule() {
-            schedule = [{type:'warm', dur:240, t:"WARM UP", d:"Jog, Jacks, Arm Circles", c:'#2997ff'}];
-            
-            const list = MOVES[state.config.mode];
+            schedule = [{type:'warm', dur:240, t:"WARM UP", d:"Jog & Jacks", c:'#0a84ff'}];
+            let moves = EXERCISES[state.config.mode];
             for(let i=0; i<12; i++) {
-                const m = list[i % list.length];
+                let m = moves[i % moves.length];
                 schedule.push({type:'work', dur:40, t:m.t, d:m.d, c:'#32d74b'});
-                schedule.push({type:'rest', dur:20, t:"REST", d:"Breathe Deeply", c:'#ff453a'});
+                schedule.push({type:'rest', dur:20, t:"REST", d:"Breathe", c:'#ff453a'});
             }
-            schedule.push({type:'cool', dur:120, t:"COOLDOWN", d:"Walk & Box Breathe", c:'#ff9f0a'});
-            schedule.push({type:'focus', dur:120, t:"VISUALIZE", d:"Memory Palace Construction", c:'#bf5af2'});
+            schedule.push({type:'cool', dur:120, t:"COOLDOWN", d:"Walk & Breathe", c:'#ff9f0a'});
+            schedule.push({type:'focus', dur:120, t:"VISUALIZE", d:"Memory Palace", c:'#bf5af2'});
         }
 
+        // Timer Rendering
         const ctx = document.getElementById('ring').getContext('2d');
         const audio = new (window.AudioContext || window.webkitAudioContext)();
 
-        function drawRing(prog, color) {
-            ctx.clearRect(0,0,300,300);
-            const cx=150, cy=150, r=130;
-            
-            // BG Track
-            ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
+        function draw(prog, col) {
+            ctx.clearRect(0,0,280,280);
+            let cx=140, cy=140, r=120;
+            ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); 
             ctx.strokeStyle = "rgba(255,255,255,0.1)"; ctx.lineWidth=8; ctx.stroke();
-            
-            // FG Progress
             ctx.beginPath(); ctx.arc(cx,cy,r,-0.5*Math.PI, (-0.5*Math.PI)+(2*Math.PI*prog));
-            ctx.strokeStyle = color; ctx.lineWidth=12; ctx.lineCap='round';
-            ctx.shadowBlur = 20; ctx.shadowColor = color; 
-            ctx.stroke(); ctx.shadow
+            ctx.strokeStyle = col; ctx.lineWidth=12; ctx.lineCap='round'; ctx.stroke();
+        }
+
+        function beep(f) {
+            let o = audio.createOscillator(), g = audio.createGain();
+            o.frequency.value=f; o.connect(g); g.connect(audio.destination);
+            o.start(); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.2); o.stop(audio.currentTime+0.2);
+        }
+
+        function runPhase() {
+            if(state.phase >= schedule.length) { finishSession(); return; }
+            let p = schedule[state.phase];
+            state.time = p.dur;
+
+            document.getElementById('phase-txt').innerText = p.t;
+            document.getElementById('phase-sub').innerText = p.d;
+            beep(p.type==='work'?880:440);
+
+            clearInterval(state.interval);
+            state.interval = setInterval(() => {
+                if(!state.paused) {
+                    state.time--; state.elapsed++;
+                    let prog = state.time / p.dur;
+                    draw(prog, p.c);
+                    let m = Math.floor(state.time/60), s = state.time%60;
+                    document.getElementById('timer-txt').innerText = `${m}:${s<10?'0':''}${s}`;
+                    
+                    if(state.time <= 0) { state.phase++; runPhase(); }
+                }
+            }, 1000);
+        }
+
+        function togglePause() {
+            state.paused = !state.paused;
+            let btn = document.getElementById('btn-p');
+            if(state.paused) {
+                if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.pause();
+                btn.innerText = "RESUME"; btn.style.background = "#fff"; btn.style.color = "#000";
+            } else {
+                if(mediaRecorder && mediaRecorder.state==='paused') mediaRecorder.resume();
+                btn.innerText = "PAUSE"; btn.style.background = ""; btn.style.color = "#fff";
+            }
+        }
+
+        function finishSession() {
+            clearInterval(state.interval);
+            if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
+
+            if(state.elapsed > 600) {
+                state.streak++;
+                db.write(state.streak);
+            }
+
+            document.getElementById('act-btns').style.display = 'none';
+            document.getElementById('fin-btns').style.display = 'grid';
+            document.getElementById('phase-txt').innerText = "COMPLETE";
+            document.getElementById('phase-sub').innerText = "Session logged locally.";
+            document.getElementById('timer-txt').innerText = "DONE";
+            draw(1, '#fff'); beep(1000);
+        }
+
+        function saveVideo() {
+            let a = document.createElement('a');
+            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_flow_${Date.now()}.webm`;
+            document.body.appendChild(a); a.click();
+        }
+    </script>
+</body>
+</html>
