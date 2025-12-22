@@ -3,469 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V10</title>
+    <title>NEURAL FLOW V11</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* === CORE AESTHETICS (MacOS Fluid) === */
+        /* === LIQUID UI ENGINE === */
         :root {
-            --bg: #000000;
-            --glass-panel: rgba(30, 30, 30, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
-            --accent: #0a84ff; /* System Blue */
-            --danger: #ff453a; /* System Red */
-            --success: #32d74b; /* System Green */
-            --blur-strength: 40px;
+            --glass-surface: rgba(20, 20, 20, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            --accent: #2997ff; /* Apple Blue */
+            --text-main: #f5f5f7;
+            --text-sub: #86868b;
+            --blur: 50px;
         }
 
         body {
             margin: 0;
-            background-color: var(--bg);
+            background: #000;
             color: var(--text-main);
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
             opacity: 0;
-            animation: fadeIn 0.8s ease forwards;
+            animation: fadeIn 1.5s ease forwards;
         }
         @keyframes fadeIn { to { opacity: 1; } }
 
-        /* === LAYOUT === */
-        #left-view {
-            flex: 1;
-            position: relative;
-            background: #111;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* === FLUID BACKGROUND ANIMATION === */
+        .aurora-bg {
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 70%);
+            z-index: 0;
+        }
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+            animation: float 20s infinite ease-in-out;
+        }
+        .orb-1 { top: 20%; left: 30%; width: 600px; height: 600px; background: #0044ff; animation-delay: 0s; }
+        .orb-2 { bottom: 20%; right: 30%; width: 500px; height: 500px; background: #ff0055; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0,0); } 50% { transform: translate(30px, -50px); } 100% { transform: translate(0,0); } }
+
+        /* === MAIN LAYOUT === */
+        #container {
+            position: relative; z-index: 10;
+            display: flex; width: 100%; height: 100%;
+            backdrop-filter: blur(0px); /* Performance fix */
         }
 
-        #right-view {
-            flex: 1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(18, 18, 18, 0.8);
-            backdrop-filter: blur(var(--blur-strength));
-            border-left: 1px solid var(--glass-border);
-            z-index: 20;
-        }
-
-        /* === VISUALS === */
-        #webcam {
-            width: 100%; height: 100%; object-fit: cover;
-            transform: scaleX(-1); opacity: 0.8;
+        /* LEFT: CAMERA ZONE */
+        #zone-visual {
+            flex: 1; position: relative; margin: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px; border: 1px solid var(--glass-border);
+            overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
         }
         
-        #neural-anim {
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(10,132,255,0.2) 0%, transparent 70%);
-            animation: breathe 4s infinite ease-in-out;
-            display: none; border-radius: 50%;
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        #pulse-visual {
+            width: 250px; height: 250px; border-radius: 50%;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 50px var(--accent);
+            animation: pulse 3s infinite;
+            display: none;
         }
-        @keyframes breathe { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.2); opacity: 0.6; } }
+        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
 
-        /* Streak Badge */
-        .streak-pill {
-            position: absolute; top: 20px; left: 20px;
-            background: rgba(0,0,0,0.6); padding: 8px 16px;
-            border-radius: 20px; font-weight: 800; font-size: 0.85rem;
-            backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
-            z-index: 10; display: flex; flex-direction: column; gap: 6px;
-        }
-        .dots-row { display: flex; gap: 4px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; }
-        .dot.fill { background: var(--success); box-shadow: 0 0 8px var(--success); }
-
-        /* === MANUAL POPUP (Mac Style) === */
-        #manual-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            display: none; /* Hidden by default */
+        /* RIGHT: CONTROL GLASS */
+        #zone-control {
+            flex: 1; margin: 20px 20px 20px 0;
+            background: var(--glass-surface);
+            backdrop-filter: blur(var(--blur));
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            display: flex; flex-direction: column;
             align-items: center; justify-content: center;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
-        .mac-window {
-            width: 90%; max-width: 500px;
-            background: rgba(30, 30, 30, 0.85);
-            backdrop-filter: blur(50px);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 18px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            padding: 30px;
-            animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+        /* === UI COMPONENTS === */
+        
+        /* Streak Capsule */
+        .streak-capsule {
+            position: absolute; top: 30px; left: 30px;
+            background: rgba(0,0,0,0.5); padding: 10px 18px;
+            border-radius: 100px; border: 1px solid var(--glass-border);
+            display: flex; gap: 10px; align-items: center;
+            backdrop-filter: blur(20px); z-index: 20;
         }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .streak-txt { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px; }
+        .dot-grid { display: flex; gap: 4px; }
+        .dot { width: 6px; height: 6px; background: #444; border-radius: 50%; }
+        .dot.active { background: #32d74b; box-shadow: 0 0 8px #32d74b; }
 
-        .mac-header { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; color: #fff; }
-        .mac-text { font-size: 0.95rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 15px; }
-        .mac-tag { 
-            display: inline-block; background: rgba(255, 69, 58, 0.15); 
-            color: var(--danger); padding: 4px 8px; border-radius: 6px; 
-            font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(255, 69, 58, 0.3);
+        /* Manual Button */
+        #btn-info {
+            position: absolute; top: 30px; right: 30px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--glass-highlight); border: 1px solid var(--glass-border);
+            color: #fff; font-weight: 600; cursor: pointer;
+            z-index: 50; transition: all 0.2s;
         }
+        #btn-info:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
 
-        .mac-btn {
-            width: 100%; padding: 14px; margin-top: 10px;
-            background: var(--accent); color: white;
-            border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+        /* Panels */
+        .panel { width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; }
+        .panel.active { display: flex; animation: slideIn 0.5s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Setup Inputs */
+        .setup-row {
+            width: 100%; max-width: 320px; margin-bottom: 25px;
+        }
+        .row-label {
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--text-sub); margin-bottom: 12px; font-weight: 700;
+        }
+        .seg-control {
+            display: flex; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 14px;
+        }
+        .seg-btn {
+            flex: 1; padding: 12px; text-align: center;
+            font-size: 0.9rem; font-weight: 500; color: #888;
+            border-radius: 10px; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        .seg-btn.selected {
+            background: #444; color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* Main Action Button */
+        .hero-btn {
+            background: var(--text-main); color: #000;
+            padding: 20px 60px; border-radius: 100px;
+            font-size: 1.1rem; font-weight: 800; border: none;
+            cursor: pointer; margin-top: 20px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.1);
             transition: transform 0.1s;
         }
-        .mac-btn:active { transform: scale(0.98); }
+        .hero-btn:active { transform: scale(0.95); }
 
-        /* Help Trigger */
-        #btn-help {
-            position: absolute; top: 20px; right: 20px;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
-            color: white; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s; z-index: 50;
-        }
-        #btn-help:hover { background: rgba(255,255,255,0.2); }
-
-        /* === UI CONTROLS === */
-        #setup-box { width: 100%; max-width: 380px; padding: 20px; }
-        
-        .control-group { margin-bottom: 25px; }
-        .label-mini { 
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; 
-            color: var(--text-muted); margin-bottom: 10px; font-weight: 700; 
-        }
-        
-        .toggle-container {
-            display: flex; background: rgba(0,0,0,0.3); 
-            padding: 4px; border-radius: 12px;
-        }
-        .toggle-item {
-            flex: 1; padding: 10px; text-align: center;
-            font-size: 0.9rem; font-weight: 600; color: #888;
-            border-radius: 8px; cursor: pointer; transition: all 0.2s;
-        }
-        .toggle-item.active { background: #333; color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-
-        #btn-init {
-            width: 100%; padding: 18px; background: #fff; color: #000;
-            border: none; border-radius: 14px; font-weight: 800; cursor: pointer;
-            font-size: 1.1rem; text-transform: uppercase;
-        }
-
-        /* === HUD === */
-        #hud-box { display: none; flex-direction: column; align-items: center; width: 100%; }
-        
-        #timer-wrap { position: relative; width: 280px; height: 280px; margin-bottom: 30px; }
-        #timer-val { 
+        /* Timer HUD */
+        #ring-container { position: relative; width: 300px; height: 300px; margin-bottom: 40px; }
+        #timer-display {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 4.5rem; font-weight: 300; font-variant-numeric: tabular-nums; 
+            font-size: 5.5rem; font-weight: 200; font-variant-numeric: tabular-nums;
+            letter-spacing: -3px; text-shadow: 0 0 30px rgba(255,255,255,0.1);
         }
-
-        #phase-name { font-size: 2rem; font-weight: 800; text-align: center; line-height: 1; }
-        #phase-hint { font-size: 1rem; color: var(--accent); margin-top: 5px; margin-bottom: 30px; }
-
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; max-width: 350px; }
-        .glass-btn {
-            padding: 15px; background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border);
-            color: #fff; border-radius: 12px; cursor: pointer; font-weight: 600;
+        
+        .phase-card {
+            background: rgba(255,255,255,0.05); padding: 20px 30px;
+            border-radius: 20px; border: 1px solid var(--glass-border);
+            text-align: center; margin-bottom: 30px; width: 80%;
         }
-        #btn-finish { color: var(--danger); background: rgba(255, 69, 58, 0.1); }
-        #btn-home { grid-column: span 2; background: var(--accent); }
+        #phase-title { font-size: 1.8rem; font-weight: 800; margin: 0; }
+        #phase-desc { color: var(--text-sub); margin-top: 8px; font-size: 1rem; }
+
+        .control-grid { display: flex; gap: 15px; width: 80%; }
+        .ctrl-btn {
+            flex: 1; padding: 18px; background: rgba(255,255,255,0.1);
+            border: 1px solid var(--glass-border); color: #fff;
+            border-radius: 16px; font-weight: 600; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .ctrl-btn:hover { background: rgba(255,255,255,0.2); }
+        .finish { color: #ff453a; background: rgba(255, 69, 58, 0.1); }
+
+        /* === INFO MODAL === */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px);
+            z-index: 100; display: none; align-items: center; justify-content: center;
+        }
+        .glass-modal {
+            width: 90%; max-width: 450px;
+            background: #1c1c1e; border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 30px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            animation: popUp 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal-h { font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; }
+        .modal-p { font-size: 0.95rem; line-height: 1.6; color: #a1a1aa; margin-bottom: 15px; }
+        .warning-box {
+            background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.3);
+            color: #ff453a; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;
+        }
 
         /* Mobile */
         @media (max-width: 900px) {
-            body { flex-direction: column; }
-            #left-view { height: 40vh; border-bottom: 1px solid var(--glass-border); }
-            #right-view { height: 60vh; border-left: none; justify-content: flex-start; padding-top: 40px; }
-            #timer-wrap { width: 200px; height: 200px; margin-bottom: 20px; }
-            #timer-val { font-size: 3.5rem; }
+            body { overflow-y: auto; }
+            #container { flex-direction: column; }
+            #zone-visual { height: 40vh; margin: 10px; border-radius: 20px; }
+            #zone-control { height: 60vh; margin: 0 10px 10px 10px; border-radius: 20px; }
+            #ring-container { width: 220px; height: 220px; margin-bottom: 20px; }
+            #timer-display { font-size: 4rem; }
         }
     </style>
 </head>
 <body>
 
-    <div id="manual-overlay">
-        <div class="mac-window">
-            <div class="mac-header">Neural Flow v10</div>
-            <div class="mac-text">
-                This tool uses <b>High-Intensity Interval Training (HIIT)</b> to trigger <i>Brain-Derived Neurotrophic Factor (BDNF)</i>. This protein acts as "fertilizer" for your neurons, improving memory retention and focus for study sessions.
+    <div class="aurora-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="glass-modal">
+            <div class="modal-h">Neural Flow v11</div>
+            <div class="modal-p">
+                This protocol uses <b>High-Intensity Interval Training</b> to maximize BDNF production. This protein acts as fertilizer for your brain's memory centers.
             </div>
-            <div class="mac-text">
-                <b>Protocol:</b> 12 Rounds. 40s Work / 20s Rest.<br>
-                <b>Goal:</b> Reach "System Failure" safely.
+            <div class="modal-p">
+                <b>The Rule:</b> Do not stop until the timer hits zero. Shake, sweat, and push to failure.
             </div>
-            <div class="mac-text" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
-                <span class="mac-tag">CRITICAL WARNING</span><br>
-                Your streak data is stored in your <b>Browser Cache</b>. If you "Clear History/Data", your streak will be permanently deleted.
+            <div class="warning-box">
+                ⚠ CAUTION: Clearing your browser cache/history will DELETE your streak permanently.
             </div>
-            <button class="mac-btn" onclick="closeManual()">I Understand</button>
+            <button class="hero-btn" style="width:100%; margin-top:20px; font-size:1rem; padding:15px;" onclick="toggleModal(false)">I Understand</button>
         </div>
     </div>
 
-    <div id="left-view">
-        <div class="streak-pill">
-            <span>🔥 STREAK: <span id="ui-streak">0</span></span>
-            <div class="dots-row" id="ui-dots"></div>
-        </div>
-        <video id="webcam" autoplay playsinline muted></video>
-        <div id="neural-anim"></div>
-    </div>
-
-    <div id="right-view">
+    <div id="container">
         
-        <button id="btn-help" onclick="openManual()">?</button>
-
-        <div id="setup-box">
-            <h1 style="margin-bottom: 5px;">SYSTEM READY</h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0; margin-bottom: 30px;">Configure your neural uplink.</p>
-
-            <div class="control-group">
-                <div class="label-mini">Visual Input</div>
-                <div class="toggle-container">
-                    <div class="toggle-item active" onclick="setCam(true, this)">Camera On</div>
-                    <div class="toggle-item" onclick="setCam(false, this)">No Camera</div>
-                </div>
+        <div id="zone-visual">
+            <div class="streak-capsule">
+                <span class="streak-txt">🔥 <span id="streak-num">0</span></span>
+                <div class="dot-grid" id="streak-dots"></div>
             </div>
-
-            <div class="control-group">
-                <div class="label-mini">Physiological State</div>
-                <div class="toggle-container">
-                    <div class="toggle-item active" onclick="setMode('fresh', this)">⚡ Fresh</div>
-                    <div class="toggle-item" onclick="setMode('sore', this)">🩹 Sore</div>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <div class="label-mini">Video Resolution</div>
-                <div class="toggle-container">
-                    <div class="toggle-item active" onclick="setQual('high', this)">High (HD)</div>
-                    <div class="toggle-item" onclick="setQual('low', this)">Low (SD)</div>
-                </div>
-            </div>
-
-            <button id="btn-init" onclick="startSystem()">Initiate Session</button>
+            <video id="webcam" autoplay playsinline muted></video>
+            <div id="pulse-visual"></div>
         </div>
 
-        <div id="hud-box">
-            <div id="timer-wrap">
-                <canvas id="ring" width="280" height="280"></canvas>
-                <div id="timer-val">00:00</div>
+        <div id="zone-control">
+            
+            <button id="btn-info" onclick="toggleModal(true)">?</button>
+
+            <div id="panel-setup" class="panel active">
+                <h1 style="margin-bottom: 5px;">Ready for Uplink</h1>
+                <p style="color: var(--text-sub); margin-top:0; margin-bottom: 40px;">Configure session parameters.</p>
+
+                <div class="setup-row">
+                    <div class="row-label">Visual Sensor</div>
+                    <div class="seg-control">
+                        <div class="seg-btn selected" onclick="updateSet('cam', true, this)">Camera On</div>
+                        <div class="seg-btn" onclick="updateSet('cam', false, this)">No Camera</div>
+                    </div>
+                </div>
+
+                <div class="setup-row">
+                    <div class="row-label">Biological Status</div>
+                    <div class="seg-control">
+                        <div class="seg-btn selected" onclick="updateSet('mode', 'fresh', this)">⚡ Fresh</div>
+                        <div class="seg-btn" onclick="updateSet('mode', 'sore', this)">🩹 Sore</div>
+                    </div>
+                </div>
+
+                <div class="setup-row">
+                    <div class="row-label">Data Quality</div>
+                    <div class="seg-control">
+                        <div class="seg-btn selected" onclick="updateSet('qual', 'high', this)">High Res</div>
+                        <div class="seg-btn" onclick="updateSet('qual', 'low', this)">Low Res</div>
+                    </div>
+                </div>
+
+                <button class="hero-btn" onclick="initSession()">INITIALIZE</button>
             </div>
 
-            <div id="phase-name">PREPARE</div>
-            <div id="phase-hint">Get in position</div>
+            <div id="panel-hud" class="panel">
+                <div id="ring-container">
+                    <canvas id="ring" width="300" height="300"></canvas>
+                    <div id="timer-display">00:00</div>
+                </div>
 
-            <div class="btn-grid" id="active-btns">
-                <button class="glass-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
-                <button class="glass-btn" id="btn-finish" onclick="finishSession()">FINISH</button>
+                <div class="phase-card">
+                    <div id="phase-title">PREPARE</div>
+                    <div id="phase-desc">Align your body</div>
+                </div>
+
+                <div class="control-grid" id="controls-active">
+                    <button class="ctrl-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
+                    <button class="ctrl-btn finish" onclick="finishSession()">FINISH</button>
+                </div>
+
+                <div class="control-grid" id="controls-finish" style="display:none; flex-direction:column;">
+                    <button class="ctrl-btn" id="btn-dl" style="background:var(--accent); display:none;" onclick="saveVideo()">SAVE VIDEO</button>
+                    <button class="ctrl-btn" onclick="window.location.reload()">BACK TO HOME</button>
+                </div>
             </div>
 
-            <div class="btn-grid" id="finish-btns" style="display:none;">
-                <button class="glass-btn" id="btn-dl" style="background:var(--accent); display:none;" onclick="saveVideo()">SAVE VIDEO</button>
-                <button class="glass-btn" id="btn-home" onclick="goHome()">BACK TO HOME</button>
-            </div>
         </div>
     </div>
 
     <script>
-        // === 1. DATA & STORAGE ===
+        // === 1. STATE MANAGEMENT ===
         const db = {
             get: () => ({
-                streak: parseInt(localStorage.getItem('nf_streak') || 0),
-                history: JSON.parse(localStorage.getItem('nf_history') || '[]'),
-                manualSeen: localStorage.getItem('nf_manual_seen')
+                streak: parseInt(localStorage.getItem('nf11_streak') || 0),
+                history: JSON.parse(localStorage.getItem('nf11_hist') || '[]'),
+                seenIntro: localStorage.getItem('nf11_intro')
             }),
             save: (s, h) => {
-                localStorage.setItem('nf_streak', s);
-                localStorage.setItem('nf_history', JSON.stringify(h));
+                localStorage.setItem('nf11_streak', s);
+                localStorage.setItem('nf11_hist', JSON.stringify(h));
             },
-            markManual: () => localStorage.setItem('nf_manual_seen', 'true')
+            markIntro: () => localStorage.setItem('nf11_intro', 'true')
         };
 
-        // Global State
         let state = {
             ...db.get(),
-            cam: true,
-            mode: 'fresh',
-            qual: 'high',
-            active: false,
-            paused: false,
-            phaseIdx: 0,
-            timeLeft: 0,
-            elapsed: 0,
-            stream: null,
-            interval: null
+            config: { cam: true, mode: 'fresh', qual: 'high' },
+            session: { active: false, paused: false, phase: 0, time: 0, elapsed: 0, interval: null }
         };
 
-        // === 2. EXERCISE DATABASE (EXPANDED) ===
-        const EXERCISES = {
-            fresh: [
-                { t: "BURPEES", h: "Chest to floor, jump high" },
-                { t: "MTN CLIMBERS", h: "Knees to chest, fast pace" },
-                { t: "JUMP SQUATS", h: "Explode up, land soft" },
-                { t: "HIGH KNEES", h: "Knees above waist level" },
-                { t: "PLANK JACKS", h: "Core tight, legs in/out" },
-                { t: "LUNGE JUMPS", h: "Switch legs in air" }
-            ],
-            sore: [
-                { t: "DEEP SQUAT", h: "Slow tempo, hold bottom" },
-                { t: "GLUTE BRIDGE", h: "Squeeze at top, 2s hold" },
-                { t: "CAT COW", h: "Arch back, breathe deep" },
-                { t: "CHILD POSE", h: "Stretch lower back" },
-                { t: "TORSO TWIST", h: "Gentle spinal rotation" },
-                { t: "HIP OPENER", h: "Lunge forward, stretch hip" }
-            ]
-        };
-
-        // Init UI
-        function init() {
-            // Check Manual
-            if (!state.manualSeen) document.getElementById('manual-overlay').style.display = 'flex';
+        // === 2. UI INITIALIZATION ===
+        function initUI() {
+            // Show modal if first time
+            if(!state.seenIntro) toggleModal(true);
             
-            // Render Stats
-            document.getElementById('ui-streak').innerText = state.streak;
-            const dots = document.getElementById('ui-dots');
-            dots.innerHTML = '';
+            // Render Streak
+            document.getElementById('streak-num').innerText = state.streak;
+            const dotContainer = document.getElementById('streak-dots');
+            dotContainer.innerHTML = '';
             for(let i=6; i>=0; i--) {
                 const d = new Date(); d.setDate(new Date().getDate() - i);
                 const k = d.toISOString().split('T')[0];
                 const dot = document.createElement('div');
-                dot.className = 'dot ' + (state.history.includes(k) ? 'fill' : '');
-                dots.appendChild(dot);
+                dot.className = 'dot ' + (state.history.includes(k) ? 'active' : '');
+                dotContainer.appendChild(dot);
             }
         }
-        init();
+        initUI();
 
-        // === 3. MANUAL & SETTINGS ===
-        function openManual() { document.getElementById('manual-overlay').style.display = 'flex'; }
-        function closeManual() { 
-            document.getElementById('manual-overlay').style.display = 'none';
-            db.markManual();
+        function toggleModal(show) {
+            document.getElementById('modal-overlay').style.display = show ? 'flex' : 'none';
+            if(!show) db.markIntro();
         }
 
-        function setCam(v, el) { state.cam = v; toggleUI(el); }
-        function setMode(v, el) { state.mode = v; toggleUI(el); }
-        function setQual(v, el) { state.qual = v; toggleUI(el); }
-        function toggleUI(el) {
-            el.parentNode.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
+        function updateSet(key, val, el) {
+            state.config[key] = val;
+            el.parentElement.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
         }
+
+        // === 3. EXERCISE DATABASE ===
+        const MOVES = {
+            fresh: [
+                {t:"BURPEES", d:"Chest to floor, jump high"},
+                {t:"MTN CLIMBERS", d:"Drive knees to chest rapidly"},
+                {t:"JUMP SQUATS", d:"Explode up, land softly"},
+                {t:"PLANK JACKS", d:"Core tight, legs in and out"},
+                {t:"HIGH KNEES", d:"Knees above hip level"},
+                {t:"SWITCH LUNGE", d:"Jump switch legs in air"}
+            ],
+            sore: [
+                {t:"DEEP SQUAT", d:"Hold bottom position"},
+                {t:"GLUTE BRIDGE", d:"Squeeze glutes at top"},
+                {t:"CAT COW", d:"Arch and round spine"},
+                {t:"HIP OPENER", d:"Lunge forward, stretch hip"},
+                {t:"CHILD POSE", d:"Sit back on heels"},
+                {t:"THORACIC TWIST", d:"Rotate chest to ceiling"}
+            ]
+        };
 
         // === 4. SYSTEM START ===
         let mediaRecorder, chunks = [], blobUrl;
 
-        async function startSystem() {
-            // Camera Logic
-            if(state.cam) {
+        async function initSession() {
+            // 1. Handle Camera
+            if(state.config.cam) {
                 try {
                     const constraints = {
                         video: {
-                            width: state.qual === 'high' ? { ideal: 1280 } : { ideal: 640 },
-                            facingMode: "user"
+                            width: state.config.qual === 'high' ? { ideal: 1280 } : { ideal: 640 },
+                            facingMode: 'user'
                         }
                     };
-                    state.stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    document.getElementById('webcam').srcObject = state.stream;
-                    document.getElementById('webcam').style.display = 'block';
-                    document.getElementById('neural-anim').style.display = 'none';
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    document.getElementById('webcam').srcObject = stream;
                     
-                    // Recorder
-                    chunks = [];
-                    const types = ['video/webm;codecs=vp9', 'video/webm'];
-                    const mime = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
-                    if(mime) {
-                        mediaRecorder = new MediaRecorder(state.stream, { mimeType: mime });
+                    // Setup Recorder
+                    if(MediaRecorder.isTypeSupported('video/webm')) {
+                        mediaRecorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
                         mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
                         mediaRecorder.onstop = () => {
-                            const b = new Blob(chunks, { type: 'video/webm' });
+                            const b = new Blob(chunks, {type:'video/webm'});
                             blobUrl = URL.createObjectURL(b);
                             document.getElementById('btn-dl').style.display = 'block';
                         };
                         mediaRecorder.start();
                     }
                 } catch(e) {
-                    alert("Camera blocked. Mode switched.");
-                    state.cam = false;
+                    alert("Camera blocked. Switching to No-Cam mode.");
+                    state.config.cam = false;
                 }
             }
-            
-            if(!state.cam) {
+
+            if(!state.config.cam) {
                 document.getElementById('webcam').style.display = 'none';
-                document.getElementById('neural-anim').style.display = 'block';
+                document.getElementById('pulse-visual').style.display = 'block';
             }
 
-            // Switch Screen
-            document.getElementById('setup-box').style.display = 'none';
-            document.getElementById('hud-box').style.display = 'flex';
+            // 2. Switch Panels
+            document.getElementById('panel-setup').classList.remove('active');
+            document.getElementById('panel-hud').classList.add('active');
             if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
 
-            // Build Schedule (12 Rounds)
+            // 3. Start Loop
             buildSchedule();
-            state.active = true;
-            state.elapsed = 0;
             runPhase();
         }
 
         // === 5. WORKOUT LOGIC ===
         let schedule = [];
-        
+
         function buildSchedule() {
-            schedule = [
-                { type: 'warm', dur: 240, t: "WARM UP", h: "Jog, Jacks, Arm Circles", c: '#0a84ff' }
-            ];
+            schedule = [{type:'warm', dur:240, t:"WARM UP", d:"Jog, Jacks, Arm Circles", c:'#2997ff'}];
             
-            const moves = EXERCISES[state.mode];
+            const list = MOVES[state.config.mode];
             for(let i=0; i<12; i++) {
-                // Cycle through exercises
-                const move = moves[i % moves.length];
-                schedule.push({ 
-                    type: 'work', dur: 40, 
-                    t: move.t, h: move.h, 
-                    c: '#32d74b' // Green
-                });
-                schedule.push({ 
-                    type: 'rest', dur: 20, 
-                    t: "REST", h: "Breathe Deeply", 
-                    c: '#ff453a' // Red
-                });
+                const m = list[i % list.length];
+                schedule.push({type:'work', dur:40, t:m.t, d:m.d, c:'#32d74b'});
+                schedule.push({type:'rest', dur:20, t:"REST", d:"Breathe Deeply", c:'#ff453a'});
             }
-            
-            schedule.push({ type: 'cool', dur: 120, t: "COOLDOWN", h: "Walk & Box Breathe", c: '#ff9f0a' });
-            schedule.push({ type: 'focus', dur: 120, t: "VISUALIZE", h: "Enter Memory Palace", c: '#bf5af2' });
+            schedule.push({type:'cool', dur:120, t:"COOLDOWN", d:"Walk & Box Breathe", c:'#ff9f0a'});
+            schedule.push({type:'focus', dur:120, t:"VISUALIZE", d:"Memory Palace Construction", c:'#bf5af2'});
         }
 
         const ctx = document.getElementById('ring').getContext('2d');
         const audio = new (window.AudioContext || window.webkitAudioContext)();
 
-        function draw(prog, color) {
-            ctx.clearRect(0,0,280,280);
-            const cx=140, cy=140, r=120;
-            // Track
+        function drawRing(prog, color) {
+            ctx.clearRect(0,0,300,300);
+            const cx=150, cy=150, r=130;
+            
+            // BG Track
             ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
             ctx.strokeStyle = "rgba(255,255,255,0.1)"; ctx.lineWidth=8; ctx.stroke();
-            // Fill
+            
+            // FG Progress
             ctx.beginPath(); ctx.arc(cx,cy,r,-0.5*Math.PI, (-0.5*Math.PI)+(2*Math.PI*prog));
-            ctx.strokeStyle = color; ctx.lineWidth=12; ctx.lineCap='round'; 
-            ctx.shadowBlur = 15; ctx.shadowColor = color;
-            ctx.stroke(); ctx.shadowBlur = 0;
-        }
-
-        function beep(freq) {
-            const o = audio.createOscillator(); const g = audio.createGain();
-            o.frequency.value=freq; o.connect(g); g.connect(audio.destination);
-            o.start(); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.2); o.stop(audio.currentTime+0.2);
-        }
-
-        function runPhase() {
-            if(state.phaseIdx >= schedule.length) { finishSession(); return; }
-            
-            const p = schedule[state.phaseIdx];
-            state.timeLeft = p.dur;
-            
-            document.getElementById('phase-na
+            ctx.strokeStyle = color; ctx.lineWidth=12; ctx.lineCap='round';
+            ctx.shadowBlur = 20; ctx.shadowColor = color; 
+            ctx.stroke(); ctx.shadow
