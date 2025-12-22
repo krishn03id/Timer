@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V8</title>
+    <title>NEURAL FLOW V9</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
         /* === CORE AESTHETICS === */
@@ -29,14 +29,65 @@
             display: flex;
         }
 
-        /* === SPLIT LAYOUT === */
-        #view-camera {
+        /* === LEFT PANEL (VISUALS) === */
+        #view-visuals {
             flex: 1;
             position: relative;
             background: #000;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            position: absolute;
+            top: 0; left: 0;
+            opacity: 0.6;
+        }
+
+        /* Placeholder Animation for No-Camera Mode */
+        #neural-pulse {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, rgba(0,0,0,0) 70%);
+            animation: pulse-anim 3s infinite ease-in-out;
+            display: none; /* Hidden by default */
+        }
+        @keyframes pulse-anim {
+            0% { transform: scale(0.8); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 0.6; }
+            100% { transform: scale(0.8); opacity: 0.3; }
+        }
+
+        /* Streak Badge */
+        .streak-container {
+            position: absolute;
+            top: 20px; left: 20px;
+            z-index: 10;
+        }
+        .streak-badge {
+            background: rgba(0,0,0,0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .history-grid { display: flex; gap: 5px; margin-top: 8px; }
+        .day-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #333; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .day-dot.done { background: var(--success); box-shadow: 0 0 5px var(--success); }
+
+        /* === RIGHT PANEL (CONTROLS) === */
         #view-controls {
             flex: 1;
             position: relative;
@@ -50,197 +101,97 @@
             border-left: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* === CAMERA FEED === */
-        #webcam {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
-            opacity: 0.6;
-            filter: grayscale(10%);
-        }
-
-        /* Streak Badge */
-        .streak-container {
-            position: absolute;
-            top: 20px; left: 20px;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .streak-badge {
-            background: rgba(0,0,0,0.7);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            display: inline-block;
-        }
-
-        /* History Dots (7 Days) */
-        .history-grid {
-            display: flex;
-            gap: 5px;
-            margin-top: 5px;
-        }
-        .day-dot {
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            background: #333;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .day-dot.done { background: var(--success); box-shadow: 0 0 5px var(--success); }
-        .day-dot.missed { background: var(--danger); }
-
-        /* === SETUP PANEL === */
+        /* === SETUP SCREEN === */
         #setup-panel {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
+            width: 100%; max-width: 400px;
+            display: flex; flex-direction: column; gap: 20px;
         }
-
-        .greeting-box {
-            text-align: left;
-            margin-bottom: 10px;
-        }
-        #smart-greeting { font-size: 1.5rem; font-weight: 800; }
-        #smart-sub { font-size: 0.9rem; opacity: 0.6; margin-top: 5px; }
 
         .setup-group {
-            background: var(--glass);
-            padding: 15px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--glass); padding: 15px;
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
         }
-
         .setup-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            opacity: 0.5;
-            margin-bottom: 12px;
-            font-weight: 800;
-            letter-spacing: 1px;
+            font-size: 0.75rem; text-transform: uppercase;
+            opacity: 0.5; margin-bottom: 10px; font-weight: 800; letter-spacing: 1px;
         }
-
         .toggle-row { display: flex; gap: 10px; }
-        
         .toggle-btn {
-            flex: 1;
-            padding: 14px;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid transparent;
-            border-radius: 12px;
-            color: #888;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.2s;
+            flex: 1; padding: 12px;
+            background: rgba(0,0,0,0.4); border-radius: 12px;
+            color: #888; cursor: pointer; font-weight: 600; text-align: center;
+            border: 1px solid transparent; transition: all 0.2s;
         }
-        
         .toggle-btn.active {
-            background: var(--primary);
-            color: black;
+            background: var(--primary); color: black;
             box-shadow: 0 4px 15px rgba(255,255,255,0.1);
         }
 
         #btn-start {
-            width: 100%;
-            padding: 22px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            cursor: pointer;
-            margin-top: 10px;
-            text-transform: uppercase;
-            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.3);
-            transition: transform 0.1s;
+            width: 100%; padding: 20px; background: var(--accent);
+            color: white; border: none; border-radius: 16px;
+            font-size: 1.1rem; font-weight: 800; cursor: pointer;
+            margin-top: 10px; text-transform: uppercase;
         }
-        #btn-start:active { transform: scale(0.98); }
 
-        /* === HUD PANEL === */
+        /* === HUD SCREEN === */
         #hud-panel {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
+            display: none; flex-direction: column; align-items: center; width: 100%;
         }
-
         #canvas-wrapper {
-            position: relative;
-            width: 320px;
-            height: 320px;
-            margin-bottom: 30px;
+            position: relative; width: 300px; height: 300px; margin-bottom: 30px;
         }
-
         #timer-text {
-            position: absolute;
-            top: 50%; left: 50%;
+            position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 5.5rem;
-            font-weight: 200;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: -2px;
+            font-size: 5rem; font-weight: 200; letter-spacing: -2px;
         }
-
-        #phase-title { font-size: 2.2rem; font-weight: 800; text-transform: uppercase; margin: 0; }
+        #phase-title { font-size: 2rem; font-weight: 800; text-transform: uppercase; }
         #phase-sub { opacity: 0.6; margin-top: 5px; margin-bottom: 30px; font-weight: 300; }
 
-        .control-row { display: flex; gap: 15px; width: 90%; max-width: 400px; }
-        
+        .control-row { display: flex; gap: 15px; width: 90%; max-width: 350px; }
         .glass-btn {
-            flex: 1;
-            padding: 18px;
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            border-radius: 14px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
+            flex: 1; padding: 15px; background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1); color: white;
+            border-radius: 14px; cursor: pointer; font-weight: 600;
         }
-        .glass-btn:hover { background: rgba(255,255,255,0.15); }
+        
+        #btn-home { display: none; background: var(--primary); color: black; font-weight: 800; }
 
         /* Mobile Layout */
         @media (max-width: 900px) {
             body { flex-direction: column; }
-            #view-camera { height: 45vh; border-radius: 0 0 30px 30px; z-index: 2; border-bottom: 1px solid rgba(255,255,255,0.1); }
-            #view-controls { height: 55vh; margin-top: -30px; padding-top: 40px; border-left: none; justify-content: flex-start; }
-            #canvas-wrapper { width: 240px; height: 240px; margin-bottom: 20px; }
-            #timer-text { font-size: 4rem; }
+            #view-visuals { height: 40vh; border-radius: 0 0 30px 30px; z-index: 2; border-bottom: 1px solid rgba(255,255,255,0.1); }
+            #view-controls { height: 60vh; margin-top: -30px; padding-top: 40px; border-left: none; justify-content: flex-start; }
+            #canvas-wrapper { width: 220px; height: 220px; margin-bottom: 20px; }
+            #timer-text { font-size: 3.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- LEFT: CAMERA & DATA -->
-    <div id="view-camera">
+    <div id="view-visuals">
         <div class="streak-container">
-            <div class="streak-badge">🔥 STREAK: <span id="streak-val">0</span> DAYS</div>
-            <div class="history-grid" id="history-dots">
-                <!-- Dots generated by JS -->
-            </div>
+            <div class="streak-badge">🔥 STREAK: <span id="streak-val">0</span></div>
+            <div class="history-grid" id="history-dots"></div>
         </div>
+        
         <video id="webcam" autoplay playsinline muted></video>
+        <div id="neural-pulse"></div>
     </div>
 
-    <!-- RIGHT: CONTROLS -->
     <div id="view-controls">
         
-        <!-- SETUP SCREEN -->
         <div id="setup-panel">
-            <div class="greeting-box">
-                <div id="smart-greeting">HELLO</div>
-                <div id="smart-sub">Checking physiological status...</div>
+            <h1 style="margin:0; font-size:1.8rem;">NEURAL FLOW</h1>
+            <p style="margin:0; opacity:0.5; margin-bottom:20px;">V9.0 // STEALTH PROTOCOL</p>
+
+            <div class="setup-group">
+                <div class="setup-title">CAMERA ACCESS</div>
+                <div class="toggle-row">
+                    <div class="toggle-btn active" onclick="setCam(true, this)">ON</div>
+                    <div class="toggle-btn" onclick="setCam(false, this)">OFF</div>
+                </div>
             </div>
             
             <div class="setup-group">
@@ -251,194 +202,159 @@
                 </div>
             </div>
 
-            <div class="setup-group">
-                <div class="setup-title">RECORDING</div>
-                <div class="toggle-row">
-                    <div class="toggle-btn active" onclick="setQual('high', this)">HD</div>
-                    <div class="toggle-btn" onclick="setQual('low', this)">SD</div>
-                </div>
-            </div>
-
-            <button id="btn-start" onclick="initSystem()">INITIALIZE PROTOCOL</button>
+            <button id="btn-start" onclick="initSystem()">INITIALIZE</button>
         </div>
 
-        <!-- WORKOUT HUD -->
         <div id="hud-panel">
             <div id="canvas-wrapper">
-                <canvas id="flowRing" width="320" height="320"></canvas>
+                <canvas id="flowRing" width="300" height="300"></canvas>
                 <div id="timer-text">00:00</div>
             </div>
 
             <div id="phase-title">READY</div>
             <div id="phase-sub">Get in position</div>
 
-            <div class="control-row">
+            <div class="control-row" id="active-controls">
                 <button class="glass-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
                 <button class="glass-btn" style="background:rgba(239, 68, 68, 0.2); color:#ef4444;" onclick="finishSession()">FINISH</button>
             </div>
-            <button class="glass-btn" id="btn-dl" style="margin-top:15px; width:90%; display:none; background:#3b82f6;" onclick="saveVideo()">SAVE VIDEO</button>
+
+            <div class="control-row" id="finish-controls" style="display:none; flex-direction:column;">
+                <button class="glass-btn" id="btn-dl" style="display:none; background:#3b82f6;" onclick="saveVideo()">SAVE VIDEO</button>
+                <button class="glass-btn" id="btn-home" onclick="goHome()">BACK TO HOME</button>
+            </div>
         </div>
 
     </div>
 
     <script>
-        // === 1. SMART DATA ENGINE ===
+        // === 1. DATA STORE ===
         const storage = {
             getStreak: () => parseInt(localStorage.getItem('neuralStreak') || 0),
             getHistory: () => JSON.parse(localStorage.getItem('neuralHistory') || '[]'),
-            saveData: (streak, history) => {
-                localStorage.setItem('neuralStreak', streak);
-                localStorage.setItem('neuralHistory', JSON.stringify(history));
+            saveData: (s, h) => {
+                localStorage.setItem('neuralStreak', s);
+                localStorage.setItem('neuralHistory', JSON.stringify(h));
             }
         };
 
         let state = {
             streak: storage.getStreak(),
             history: storage.getHistory(),
+            useCamera: true,
             mode: 'fresh',
-            quality: 'high',
             paused: false,
             phase: 0,
             time: 0,
             duration: 0,
-            totalElapsed: 0, // Track total workout time
-            interval: null
+            totalElapsed: 0,
+            interval: null,
+            stream: null
         };
 
-        // --- Smart Initialization ---
-        function initUI() {
-            // 1. Update Streak Text
+        // UI Init
+        function initDataUI() {
             document.getElementById('streak-val').innerText = state.streak;
-
-            // 2. Build History Dots (Last 7 Days)
-            const dotContainer = document.getElementById('history-dots');
-            dotContainer.innerHTML = '';
-            const today = new Date();
+            const grid = document.getElementById('history-dots');
+            grid.innerHTML = '';
             for(let i=6; i>=0; i--) {
-                const d = new Date();
-                d.setDate(today.getDate() - i);
-                const dateStr = d.toISOString().split('T')[0];
+                const d = new Date(); d.setDate(new Date().getDate() - i);
+                const str = d.toISOString().split('T')[0];
                 const dot = document.createElement('div');
-                dot.className = 'day-dot ' + (state.history.includes(dateStr) ? 'done' : '');
-                // Simple logic: if past day and not in history, marked as missed (visual only for now)
-                if(!state.history.includes(dateStr) && i !== 0) dot.style.opacity = '0.3'; 
-                dotContainer.appendChild(dot);
-            }
-
-            // 3. Smart Greeting based on Time
-            const hour = new Date().getHours();
-            const greeting = document.getElementById('smart-greeting');
-            const sub = document.getElementById('smart-sub');
-            const freshBtn = document.querySelector(".toggle-btn"); // Default Fresh button
-
-            if (hour >= 5 && hour < 12) {
-                greeting.innerText = "GOOD MORNING";
-                sub.innerText = "BDNF priming window active.";
-            } else if (hour >= 12 && hour < 14) {
-                greeting.innerText = "IT'S GO TIME";
-                sub.innerText = "12:30 PM Protocol detected. HIIT recommended.";
-                setMode('fresh', freshBtn); // Auto-suggest Fresh
-            } else if (hour >= 14 && hour < 20) {
-                greeting.innerText = "AFTERNOON SESSION";
-                sub.innerText = "Ensure you have fueled up.";
-            } else {
-                greeting.innerText = "LATE SESSION";
-                sub.innerText = "Consider 'Sore' mode for recovery.";
+                dot.className = 'day-dot ' + (state.history.includes(str) ? 'done' : '');
+                grid.appendChild(dot);
             }
         }
-        initUI();
+        initDataUI();
 
-        // === 2. WORKOUT LOGIC ===
-        const schedules = {
-            fresh: [
-                { type: 'warm', dur: 240, title: "WARM UP", sub: "Jog / Jacks", col: '#3b82f6' },
-                { type: 'cool', dur: 120, title: "COOLDOWN", sub: "Walk & Breathe", col: '#f59e0b' },
-                { type: 'focus', dur: 120, title: "VISUALIZE", sub: "Stillness", col: '#8b5cf6' }
-            ],
-            sore: [
-                { type: 'warm', dur: 240, title: "MOBILITY", sub: "Arm Swings", col: '#3b82f6' },
-                { type: 'cool', dur: 120, title: "STRETCH", sub: "Deep Holds", col: '#f59e0b' },
-                { type: 'focus', dur: 120, title: "VISUALIZE", sub: "Stillness", col: '#8b5cf6' }
-            ]
-        };
+        // === 2. SETUP ===
+        function setCam(val, el) {
+            state.useCamera = val;
+            document.querySelectorAll('.setup-group:nth-child(3) .toggle-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+        function setMode(val, el) {
+            state.mode = val;
+            document.querySelectorAll('.setup-group:nth-child(4) .toggle-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
 
-        function buildSchedule() {
-            let s = [...schedules[state.mode]];
-            let rounds = [];
-            for(let i=1; i<=12; i++) {
-                if(state.mode === 'fresh') {
-                    rounds.push({ type: 'work', dur: 40, title: `WORK ${i}/12`, sub: "Max Intensity", col: '#10b981' });
-                    rounds.push({ type: 'rest', dur: 20, title: "REST", sub: "Recover", col: '#ef4444' });
-                } else {
-                    rounds.push({ type: 'work', dur: 40, title: `FLOW ${i}/12`, sub: "Slow Movement", col: '#10b981' });
-                    rounds.push({ type: 'rest', dur: 20, title: "BREATHE", sub: "Relax", col: '#ef4444' });
+        // === 3. START SYSTEM ===
+        let mediaRecorder, chunks = [], blobUrl;
+
+        async function initSystem() {
+            // Camera Logic
+            if(state.useCamera) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                    state.stream = stream;
+                    document.getElementById('webcam').srcObject = stream;
+                    document.getElementById('webcam').style.display = 'block';
+                    document.getElementById('neural-pulse').style.display = 'none';
+
+                    // Recorder
+                    chunks = [];
+                    const opts = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') ? {mimeType:'video/webm; codecs=vp9'} : {mimeType:'video/webm'};
+                    mediaRecorder = new MediaRecorder(stream, opts);
+                    mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, {type:'video/webm'});
+                        blobUrl = URL.createObjectURL(blob);
+                        document.getElementById('btn-dl').style.display = 'block';
+                    };
+                    mediaRecorder.start();
+
+                } catch(e) {
+                    alert("Camera blocked. Switching to No-Cam mode.");
+                    state.useCamera = false;
                 }
             }
-            s.splice(1, 0, ...rounds);
+            
+            // No Camera Fallback
+            if(!state.useCamera) {
+                document.getElementById('webcam').style.display = 'none';
+                document.getElementById('neural-pulse').style.display = 'block';
+            }
+
+            // Screen Switch
+            document.getElementById('setup-panel').style.display = 'none';
+            document.getElementById('hud-panel').style.display = 'flex';
+            if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+
+            // Start Logic
+            state.totalElapsed = 0;
+            state.phase = 0;
+            state.paused = false;
+            activeSchedule = buildSchedule();
+            runPhase();
+        }
+
+        // === 4. WORKOUT LOGIC ===
+        const schedules = {
+            fresh: [ {type:'warm',dur:240,t:"WARM UP",s:"Jog / Jacks",c:'#3b82f6'}, {type:'cool',dur:120,t:"COOLDOWN",s:"Walk",c:'#f59e0b'}, {type:'focus',dur:120,t:"VISUALIZE",s:"Stillness",c:'#8b5cf6'} ],
+            sore: [ {type:'warm',dur:240,t:"MOBILITY",s:"Rotations",c:'#3b82f6'}, {type:'cool',dur:120,t:"STRETCH",s:"Holds",c:'#f59e0b'}, {type:'focus',dur:120,t:"VISUALIZE",s:"Stillness",c:'#8b5cf6'} ]
+        };
+        function buildSchedule() {
+            let s = [...schedules[state.mode]];
+            let r = [];
+            for(let i=1; i<=12; i++) {
+                if(state.mode==='fresh') r.push({type:'work',dur:40,t:`WORK ${i}/12`,s:"Max Power",c:'#10b981'}, {type:'rest',dur:20,t:"REST",s:"Breathe",c:'#ef4444'});
+                else r.push({type:'work',dur:40,t:`FLOW ${i}/12`,s:"Slow Move",c:'#10b981'}, {type:'rest',dur:20,t:"BREATHE",s:"Relax",c:'#ef4444'});
+            }
+            s.splice(1, 0, ...r);
             return s;
         }
         let activeSchedule = [];
 
-        function setMode(m, el) { 
-            state.mode = m; 
-            document.querySelectorAll('.setup-group:nth-child(2) .toggle-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active'); 
-        }
-        function setQual(q, el) { 
-            state.quality = q; 
-            document.querySelectorAll('.setup-group:nth-child(3) .toggle-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active'); 
-        }
-
-        // === 3. SYSTEM START ===
-        let mediaRecorder, chunks = [], blobUrl;
-
-        async function initSystem() {
-            const constraints = {
-                video: { 
-                    width: state.quality === 'high' ? { ideal: 1280 } : { ideal: 640 },
-                    facingMode: "user"
-                }, 
-                audio: false 
-            };
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                document.getElementById('webcam').srcObject = stream;
-                
-                document.getElementById('setup-panel').style.display = 'none';
-                document.getElementById('hud-panel').style.display = 'flex';
-                
-                if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-
-                const opts = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') ? {mimeType: 'video/webm; codecs=vp9'} : {mimeType: 'video/webm'};
-                mediaRecorder = new MediaRecorder(stream, opts);
-                mediaRecorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'video/webm' });
-                    blobUrl = URL.createObjectURL(blob);
-                    document.getElementById('btn-dl').style.display = 'block';
-                };
-                mediaRecorder.start();
-
-                state.totalElapsed = 0; // Reset counter
-                activeSchedule = buildSchedule();
-                runPhase();
-
-            } catch (err) { alert("Camera Permission Needed"); }
-        }
-
-        // === 4. TIMER LOOP ===
+        // Timer
         const ctx = document.getElementById('flowRing').getContext('2d');
         const audio = new (window.AudioContext || window.webkitAudioContext)();
         
-        function draw(color, prog) {
-            ctx.clearRect(0,0,320,320);
-            const cx=160, cy=160, r=140;
-            ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
-            ctx.strokeStyle = "rgba(255,255,255,0.05)"; ctx.lineWidth=6; ctx.stroke();
-            ctx.beginPath(); ctx.arc(cx,cy,r,-0.5*Math.PI, (-0.5*Math.PI)+(2*Math.PI*prog));
-            ctx.strokeStyle = color; ctx.lineWidth=12; ctx.lineCap='round'; ctx.stroke();
+        function draw(c, p) {
+            ctx.clearRect(0,0,300,300);
+            const cx=150, cy=150, r=130;
+            ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.strokeStyle="rgba(255,255,255,0.05)"; ctx.lineWidth=6; ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx,cy,r,-0.5*Math.PI, (-0.5*Math.PI)+(2*Math.PI*p)); ctx.strokeStyle=c; ctx.lineWidth=12; ctx.lineCap='round'; ctx.stroke();
         }
 
         function beep(f=880) {
@@ -449,32 +365,21 @@
 
         function runPhase() {
             if(state.phase >= activeSchedule.length) { finishSession(); return; }
-            
             const p = activeSchedule[state.phase];
-            state.time = p.dur;
-            state.duration = p.dur;
+            state.time = p.dur; state.duration = p.dur;
 
-            document.getElementById('phase-title').innerText = p.title;
-            document.getElementById('phase-sub').innerText = p.sub;
-            beep(p.type === 'work' ? 880 : 440);
+            document.getElementById('phase-title').innerText = p.t;
+            document.getElementById('phase-sub').innerText = p.s;
+            beep(p.type==='work'?880:440);
 
             clearInterval(state.interval);
             state.interval = setInterval(() => {
                 if(!state.paused) {
-                    state.time--;
-                    state.totalElapsed++; // Strict tracking
-                    
-                    const prog = state.time / state.duration;
-                    draw(p.col, prog);
-                    
-                    const m = Math.floor(state.time/60);
-                    const s = state.time%60;
+                    state.time--; state.totalElapsed++;
+                    draw(p.c, state.time/state.duration);
+                    const m = Math.floor(state.time/60); const s = state.time%60;
                     document.getElementById('timer-text').innerText = `${m}:${s<10?'0':''}${s}`;
-
-                    if(state.time <= 0) {
-                        state.phase++;
-                        runPhase();
-                    }
+                    if(state.time<=0) { state.phase++; runPhase(); }
                 }
             }, 1000);
         }
@@ -483,47 +388,61 @@
             state.paused = !state.paused;
             const btn = document.getElementById('btn-pause');
             if(state.paused) {
-                if(mediaRecorder.state === 'recording') mediaRecorder.pause();
-                btn.innerText = "RESUME";
-                btn.style.background = "#fff";
-                btn.style.color = "#000";
+                if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.pause();
+                btn.innerText = "RESUME"; btn.style.background = "#fff"; btn.style.color="#000";
             } else {
-                if(mediaRecorder.state === 'paused') mediaRecorder.resume();
-                btn.innerText = "PAUSE";
-                btn.style.background = "";
-                btn.style.color = "#fff";
+                if(mediaRecorder && mediaRecorder.state==='paused') mediaRecorder.resume();
+                btn.innerText = "PAUSE"; btn.style.background = ""; btn.style.color="#fff";
             }
         }
 
         function finishSession() {
             clearInterval(state.interval);
-            if(mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-            
-            // === STRICT STREAK LOGIC ===
-            // 1. Must be > 10 mins (600s)
-            // 2. Must be a new day
-            const todayStr = new Date().toISOString().split('T')[0];
-            let msg = "Session Saved";
+            if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
 
+            // Logic
+            const today = new Date().toISOString().split('T')[0];
+            let msg = "Session Complete";
             if(state.totalElapsed >= 600) {
-                if(!state.history.includes(todayStr)) {
-                    state.streak++;
-                    state.history.push(todayStr);
+                if(!state.history.includes(today)) {
+                    state.streak++; state.history.push(today);
                     storage.saveData(state.streak, state.history);
-                    msg = "STREAK INCREASED +1 🔥";
-                } else {
-                    msg = "Daily Streak Already Logged";
+                    msg = "STREAK +1 🔥";
                 }
-            } else {
-                msg = "Too Short for Streak (<10m)";
             }
 
+            // UI Finish State
             document.getElementById('phase-title').innerText = "COMPLETE";
             document.getElementById('phase-sub').innerText = msg;
             document.getElementById('timer-text').innerText = "DONE";
-            document.getElementById('btn-pause').style.display = 'none';
-            draw('#fff', 1);
-            beep(1000);
+            draw('#fff', 1); beep(1000);
+
+            // Switch Buttons
+            document.getElementById('active-controls').style.display = 'none';
+            document.getElementById('finish-controls').style.display = 'flex';
+            document.getElementById('btn-home').style.display = 'block';
+            
+            initDataUI(); // Refresh badge
+        }
+
+        function goHome() {
+            // Stop Camera
+            if(state.stream) state.stream.getTracks().forEach(track => track.stop());
+            
+            // Reset UI
+            document.getElementById('hud-panel').style.display = 'none';
+            document.getElementById('setup-panel').style.display = 'flex';
+            
+            // Reset Buttons
+            document.getElementById('active-controls').style.display = 'flex';
+            document.getElementById('finish-controls').style.display = 'none';
+            document.getElementById('btn-pause').innerText = "PAUSE";
+            document.getElementById('btn-pause').style.background = "";
+            document.getElementById('btn-pause').style.color = "#fff";
+            document.getElementById('btn-dl').style.display = 'none';
+            
+            // Reload Data Visuals
+            initDataUI();
         }
 
         function saveVideo() {
@@ -534,3 +453,4 @@
     </script>
 </body>
 </html>
+
