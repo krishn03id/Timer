@@ -3,321 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V13</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW V14</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        /* === V13 TITANIUM THEME === */
+        /* === TITANIUM STEALTH THEME === */
         :root {
             --bg: #000000;
-            --surface: #111111;
-            --surface-highlight: #1a1a1a;
-            --border: #333333;
-            --text-primary: #ffffff;
-            --text-secondary: #888888;
-            --accent: #ffffff; /* Stark White Accents */
-            --action: #007AFF; /* Professional Blue */
+            --surface: #0a0a0a;
+            --border: #222;
+            --text-main: #ffffff;
+            --text-dim: #666;
+            --accent: #ffffff;
+            --action: #007AFF;
             --danger: #FF3B30;
         }
-
+        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+        
         body {
-            margin: 0; background: var(--bg); color: var(--text-primary);
+            margin: 0; background: var(--bg); color: var(--text-main);
             font-family: 'Inter', sans-serif; height: 100vh; width: 100vw;
-            overflow: hidden; display: flex; opacity: 0; animation: fadeOn 0.5s ease forwards;
+            overflow: hidden; display: flex; opacity: 0; animation: fadeIn 0.5s ease forwards;
         }
-        @keyframes fadeOn { to { opacity: 1; } }
+        @keyframes fadeIn { to { opacity: 1; } }
 
-        /* === LAYOUT === */
-        #app-container {
-            display: flex; width: 100%; height: 100%; position: relative; z-index: 1;
-        }
+        /* === MAIN LAYOUT === */
+        #app { display: flex; width: 100%; height: 100%; }
 
         /* LEFT: MONITOR */
-        #monitor-panel {
+        #monitor {
             flex: 1; position: relative; background: #050505;
-            border-right: 1px solid var(--border); overflow: hidden;
+            border-right: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
         }
-        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.7; }
-        
-        #placeholder-ring {
-            width: 200px; height: 200px; border-radius: 50%;
-            border: 2px solid #333;
-            display: none; align-items: center; justify-content: center;
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; }
+        #placeholder { 
+            width: 200px; height: 200px; border: 2px solid #333; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; 
+            font-size: 0.8rem; letter-spacing: 2px; color: #444; font-weight: 700;
         }
-        #placeholder-ring::after { content: "NO SIGNAL"; font-size: 0.8rem; color: #555; font-weight: 700; letter-spacing: 2px; }
 
-        /* RIGHT: CONTROL DECK */
-        #control-panel {
+        /* RIGHT: CONTROLS */
+        #controls {
             flex: 1; max-width: 500px; background: var(--surface);
             display: flex; flex-direction: column; position: relative;
         }
 
-        /* === HEADER === */
-        .top-bar {
-            height: 60px; border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; background: var(--surface);
+        /* HEADER */
+        .header {
+            height: 70px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; border-bottom: 1px solid var(--border);
         }
-        .app-title { font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
+        .title { font-weight: 900; letter-spacing: -0.5px; font-size: 1.1rem; }
+        .head-btns { display: flex; gap: 10px; }
         .icon-btn {
-            background: transparent; border: 1px solid var(--border); color: #fff;
-            width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
-            font-weight: 600; font-size: 1rem; transition: background 0.2s;
+            width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
+            background: transparent; color: #fff; cursor: pointer; display: flex; 
+            align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;
         }
-        .icon-btn:active { background: #333; }
+        .icon-btn:hover { background: #111; }
 
-        /* === SCROLLABLE CONTENT === */
-        .scroll-content {
-            flex: 1; overflow-y: auto; padding: 30px;
+        /* SCREENS */
+        .screen {
+            flex: 1; display: none; flex-direction: column; 
+            align-items: center; justify-content: center; padding: 40px;
         }
+        .screen.active { display: flex; }
 
-        /* === CARDS (Matte Finish) === */
-        .card {
-            background: var(--surface-highlight); border: 1px solid var(--border);
-            border-radius: 12px; padding: 20px; margin-bottom: 20px;
+        /* HOME SCREEN */
+        #home-screen { text-align: center; }
+        .big-btn {
+            width: 260px; height: 260px; border-radius: 50%; border: 4px solid #333;
+            background: transparent; color: #fff; font-size: 1.2rem; font-weight: 800;
+            cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 10px;
         }
-        .card-header {
-            font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);
-            font-weight: 700; letter-spacing: 1px; margin-bottom: 15px;
-        }
+        .big-btn:hover { border-color: #fff; box-shadow: 0 0 80px rgba(255,255,255,0.1); }
+        .big-btn:active { transform: scale(0.95); }
+        .sub-txt { font-size: 0.8rem; color: #666; font-weight: 500; text-transform: uppercase; }
 
-        /* === INPUTS & SLIDERS === */
-        .setting-row {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 15px;
-        }
-        .setting-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        /* HUD SCREEN */
+        #timer { font-size: 6rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 50px; }
         
-        .setting-label { font-size: 0.9rem; font-weight: 500; }
-        .setting-input {
-            background: #000; border: 1px solid var(--border); color: #fff;
-            padding: 8px 12px; border-radius: 6px; width: 80px; text-align: center;
-            font-family: monospace; font-size: 1rem;
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 400px; }
+        .act-btn {
+            padding: 25px; border-radius: 14px; border: 1px solid var(--border);
+            background: #111; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
         }
+        .act-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
+        .act-btn:active { transform: scale(0.98); }
 
-        /* Segmented Control */
-        .seg-box {
-            display: flex; background: #000; padding: 3px; border-radius: 8px;
-            border: 1px solid var(--border); width: 100%;
-        }
-        .seg-opt {
-            flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: 600;
-            color: #666; cursor: pointer; border-radius: 6px; transition: all 0.2s;
-        }
-        .seg-opt.active { background: #333; color: #fff; }
-
-        /* === ACTION BUTTONS === */
-        .btn-primary {
-            width: 100%; padding: 18px; background: var(--text-primary); color: #000;
-            border: none; border-radius: 10px; font-weight: 800; font-size: 1rem;
-            cursor: pointer; margin-top: 10px; letter-spacing: 0.5px;
-        }
-        .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* === HUD MODE === */
-        #hud-view {
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            height: 100%;
-        }
-        #timer-display {
-            font-size: 6rem; font-weight: 900; letter-spacing: -3px; font-variant-numeric: tabular-nums;
-            margin-bottom: 10px;
-        }
-        #phase-display {
-            font-size: 1.5rem; color: var(--text-secondary); text-transform: uppercase;
-            letter-spacing: 2px; font-weight: 600; margin-bottom: 40px;
-        }
-        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .hud-btn {
-            padding: 20px; background: var(--surface-highlight); border: 1px solid var(--border);
-            color: #fff; font-weight: 700; cursor: pointer; border-radius: 10px;
-        }
-        .hud-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.3); }
-
-        /* === MANUAL MODAL === */
-        #manual-modal {
+        /* MODALS */
+        .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 100; display: none;
-            align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.85); z-index: 100; display: none;
+            backdrop-filter: blur(15px); align-items: center; justify-content: center;
         }
-        .modal-content {
-            background: var(--surface); width: 90%; max-width: 600px; max-height: 80vh;
-            border: 1px solid var(--border); border-radius: 16px; overflow-y: auto;
-            padding: 40px; box-shadow: 0 50px 100px #000;
+        .modal-card {
+            background: #0a0a0a; width: 90%; max-width: 500px; max-height: 85vh;
+            border: 1px solid var(--border); border-radius: 20px; padding: 30px;
+            overflow-y: auto; box-shadow: 0 50px 100px #000;
         }
-        h2 { margin-top: 0; font-size: 1.8rem; }
-        h3 { font-size: 1rem; color: var(--action); margin-top: 30px; text-transform: uppercase; }
-        p { color: #aaa; line-height: 1.6; font-size: 0.95rem; }
         
+        /* SETTINGS UI */
+        .set-grp { margin-bottom: 25px; }
+        .set-lbl { font-size: 0.75rem; text-transform: uppercase; color: #666; font-weight: 700; margin-bottom: 10px; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #1a1a1a; padding-bottom: 12px; }
+        .input-row label { font-size: 0.95rem; }
+        .num-in { background: #111; border: 1px solid #333; color: #fff; width: 70px; padding: 8px; text-align: center; border-radius: 6px; }
+
+        .seg-row { display: flex; background: #111; padding: 4px; border-radius: 10px; }
+        .seg-btn { flex: 1; padding: 10px; text-align: center; font-size: 0.9rem; color: #666; cursor: pointer; border-radius: 8px; font-weight: 600; }
+        .seg-btn.active { background: #333; color: #fff; }
+
+        .save-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 20px; }
+
         /* Mobile */
         @media (max-width: 900px) {
-            #app-container { flex-direction: column; }
-            #monitor-panel { height: 35vh; border-right: none; border-bottom: 1px solid var(--border); }
-            #control-panel { height: 65vh; max-width: 100%; }
+            #app { flex-direction: column; }
+            #monitor { height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+            #controls { height: 60vh; max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div id="manual-modal">
-        <div class="modal-content">
-            <h2>Neural Protocol Manual</h2>
-            <p>A precision tool for triggering neurogenesis via controlled stress.</p>
-
-            <h3>Why HIIT?</h3>
-            <p>High-Intensity Interval Training (HIIT) is the most potent trigger for <b>BDNF (Brain-Derived Neurotrophic Factor)</b>. Unlike steady cardio, the "spike" in heart rate signals the brain to prepare for survival by upgrading neural hardware.</p>
+    <div id="modal-settings" class="modal">
+        <div class="modal-card">
+            <h2 style="margin-top:0;">Session Configuration</h2>
             
-            <h3>Physiological Benefits</h3>
-            <ul>
-                <li><b>Mitochondrial Biogenesis:</b> Creates new power plants in cells.</li>
-                <li><b>Lactate Shuttle:</b> Uses metabolic waste as super-fuel for the brain.</li>
-                <li><b>Neuroplasticity:</b> Increases synaptic density in the Hippocampus (Memory).</li>
-            </ul>
+            <div class="set-grp">
+                <div class="set-lbl">Timers (Seconds)</div>
+                <div class="input-row"><label>Warmup</label><input type="number" id="in-warm" class="num-in" value="240"></div>
+                <div class="input-row"><label>Work Phase</label><input type="number" id="in-work" class="num-in" value="40"></div>
+                <div class="input-row"><label>Rest Phase</label><input type="number" id="in-rest" class="num-in" value="20"></div>
+                <div class="input-row"><label>Cooldown</label><input type="number" id="in-cool" class="num-in" value="120"></div>
+                <div class="input-row"><label>Visualization</label><input type="number" id="in-vis" class="num-in" value="120"></div>
+            </div>
 
-            <h3>Data Integrity</h3>
-            <p style="color: var(--danger);"><b>WARNING:</b> Your Streak is stored in Browser Cache. Clearing history will wipe it. Do not clear cache.</p>
+            <div class="set-grp">
+                <div class="set-lbl">Input Source</div>
+                <div class="seg-row">
+                    <div class="seg-btn active" onclick="setOpt('cam', true, this)">Camera</div>
+                    <div class="seg-btn" onclick="setOpt('cam', false, this)">No Cam</div>
+                </div>
+            </div>
 
-            <button class="btn-primary" onclick="closeManual()" style="margin-top:20px;">ACKNOWLEDGE</button>
+            <div class="set-grp">
+                <div class="set-lbl">Recording Quality</div>
+                <div class="seg-row">
+                    <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
+                    <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
+                    <div class="seg-btn active" onclick="setOpt('qual', 'high', this)">High</div>
+                </div>
+            </div>
+
+            <div class="set-grp">
+                <div class="set-lbl">Physiology</div>
+                <div class="seg-row">
+                    <div class="seg-btn active" onclick="setOpt('mode', 'fresh', this)">Fresh</div>
+                    <div class="seg-btn" onclick="setOpt('mode', 'sore', this)">Sore</div>
+                </div>
+            </div>
+
+            <button class="save-btn" onclick="closeModal('modal-settings')">SAVE & CLOSE</button>
         </div>
     </div>
 
-    <div id="app-container">
-        <div id="monitor-panel">
+    <div id="modal-info" class="modal">
+        <div class="modal-card">
+            <h2 style="margin-top:0;">Protocol Manual</h2>
+            <p style="color:#aaa; line-height:1.6;">Designed for high-performance neurogenesis. Use HIIT to trigger BDNF production.</p>
+            <div style="background:rgba(255,59,48,0.1); color:#ff3b30; padding:15px; border-radius:10px; font-weight:700; font-size:0.9rem;">
+                ⚠ WARNING: Streak data is stored in browser cache. Clearing history will wipe your streak.
+            </div>
+            <button class="save-btn" onclick="closeModal('modal-info')">ACKNOWLEDGE</button>
+        </div>
+    </div>
+
+    <div id="app">
+        
+        <div id="monitor">
             <video id="webcam" autoplay playsinline muted></video>
-            <div id="placeholder-ring"></div>
+            <div id="placeholder">NO SIGNAL</div>
         </div>
 
-        <div id="control-panel">
-            
-            <div class="top-bar">
-                <div class="app-title">NEURAL FLOW v13</div>
-                <div style="display:flex; gap:10px;">
-                    <button class="icon-btn" onclick="openManual()">?</button>
+        <div id="controls">
+            <div class="header">
+                <div class="title">NEURAL FLOW v14</div>
+                <div class="head-btns">
+                    <button class="icon-btn" onclick="openModal('modal-settings')">⚙️</button>
+                    <button class="icon-btn" onclick="openModal('modal-info')">?</button>
                 </div>
             </div>
 
-            <div id="settings-view" class="scroll-content">
+            <div id="scr-home" class="screen active">
+                <button class="big-btn" onclick="startSystem()">
+                    <div>INITIALIZE</div>
+                    <div class="sub-txt">SYSTEM READY</div>
+                </button>
+            </div>
+
+            <div id="scr-hud" class="screen">
+                <div id="timer">00:00</div>
+                <div id="phase-lbl">READY</div>
                 
-                <div class="card">
-                    <div class="card-header">Session Config</div>
-                    <div class="setting-row">
-                        <span class="setting-label">Warmup (sec)</span>
-                        <input type="number" id="in-warm" class="setting-input" value="240">
-                    </div>
-                    <div class="setting-row">
-                        <span class="setting-label">Work Phase (sec)</span>
-                        <input type="number" id="in-work" class="setting-input" value="40">
-                    </div>
-                    <div class="setting-row">
-                        <span class="setting-label">Rest Phase (sec)</span>
-                        <input type="number" id="in-rest" class="setting-input" value="20">
-                    </div>
-                    <div class="setting-row">
-                        <span class="setting-label">Cool Down (sec)</span>
-                        <input type="number" id="in-cool" class="setting-input" value="120">
-                    </div>
-                    <div class="setting-row">
-                        <span class="setting-label">Visualization (sec)</span>
-                        <input type="number" id="in-vis" class="setting-input" value="120">
-                    </div>
+                <div class="hud-grid" id="active-ctrls">
+                    <button class="act-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
+                    <button class="act-btn finish" onclick="finishSession()">FINISH</button>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">Input Source</div>
-                    <div class="seg-box">
-                        <div class="seg-opt active" onclick="setOpt('cam', true, this)">Camera</div>
-                        <div class="seg-opt" onclick="setOpt('cam', false, this)">No Cam</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">Recording Quality</div>
-                    <div class="seg-box">
-                        <div class="seg-opt" onclick="setOpt('qual', 'low', this)">Low (480p)</div>
-                        <div class="seg-opt" onclick="setOpt('qual', 'mid', this)">Mid (720p)</div>
-                        <div class="seg-opt active" onclick="setOpt('qual', 'high', this)">High (1080p)</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">Physiological Status</div>
-                    <div class="seg-box">
-                        <div class="seg-opt active" onclick="setOpt('mode', 'fresh', this)">Fresh</div>
-                        <div class="seg-opt" onclick="setOpt('mode', 'sore', this)">Sore</div>
-                    </div>
-                </div>
-
-                <button class="btn-primary" onclick="startProtocol()">INITIALIZE SYSTEM</button>
-            </div>
-
-            <div id="hud-view" class="scroll-content">
-                <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%;">
-                    <div id="timer-display">00:00</div>
-                    <div id="phase-display">READY</div>
-                    <div style="height:4px; width:100%; background:#222; border-radius:2px; overflow:hidden;">
-                        <div id="progress-bar" style="height:100%; width:0%; background:#fff; transition: width 1s linear;"></div>
-                    </div>
-                </div>
-
-                <div class="hud-grid">
-                    <button class="hud-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
-                    <button class="hud-btn finish" onclick="finishSession()">FINISH</button>
-                </div>
-                
-                <div id="post-actions" class="hud-grid" style="display:none; margin-top:15px;">
-                    <button class="hud-btn" id="btn-dl" style="background:var(--action); display:none;" onclick="saveVideo()">SAVE VIDEO</button>
-                    <button class="hud-btn" onclick="location.reload()">HOME</button>
+                <div class="hud-grid" id="finish-ctrls" style="display:none;">
+                    <button class="act-btn" id="btn-dl" style="background:#007aff; display:none;" onclick="saveVideo()">SAVE</button>
+                    <button class="act-btn" onclick="location.reload()">HOME</button>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-        // === 1. CORE CONFIG ===
-        let config = {
-            cam: true,
-            mode: 'fresh',
-            qual: 'high' // low, mid, high
-        };
+        // === STATE ===
+        let config = { cam: true, qual: 'high', mode: 'fresh' };
+        let session = { phase: 0, time: 0, interval: null, paused: false };
+        let schedule = [];
+        let mediaRecorder, chunks = [], blobUrl;
 
-        // UI Toggles
+        // === UI UTILS ===
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
         function setOpt(key, val, el) {
             config[key] = val;
             let siblings = el.parentElement.children;
-            for(let sib of siblings) sib.classList.remove('active');
+            for(let btn of siblings) btn.classList.remove('active');
             el.classList.add('active');
         }
 
-        function openManual() { document.getElementById('manual-modal').style.display = 'flex'; }
-        function closeManual() { document.getElementById('manual-modal').style.display = 'none'; }
-
-        // === 2. START LOGIC ===
-        let mediaRecorder, chunks = [], blobUrl;
-        let session = { active: false, paused: false, phase: 0, time: 0, interval: null };
-
-        async function startProtocol() {
-            // 1. Get Custom Times
-            const times = {
-                warm: parseInt(document.getElementById('in-warm').value) || 240,
-                work: parseInt(document.getElementById('in-work').value) || 40,
-                rest: parseInt(document.getElementById('in-rest').value) || 20,
-                cool: parseInt(document.getElementById('in-cool').value) || 120,
-                vis: parseInt(document.getElementById('in-vis').value) || 120
-            };
-
-            // 2. Camera Setup
+        // === START LOGIC ===
+        async function startSystem() {
+            // 1. Setup Camera
             if(config.cam) {
                 try {
-                    let w = 1280, h = 720;
-                    if(config.qual === 'low') { w=640; h=480; }
-                    if(config.qual === 'high') { w=1920; h=1080; }
-
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { width: { ideal: w }, height: { ideal: h }, facingMode: 'user' }, 
-                        audio: false 
+                    let w=1280, h=720;
+                    if(config.qual==='low') { w=640; h=480; }
+                    if(config.qual==='high') { w=1920; h=1080; }
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: {ideal:w}, height: {ideal:h}, facingMode: 'user' }, 
+                        audio: false
                     });
                     document.getElementById('webcam').srcObject = stream;
                     
@@ -333,71 +270,64 @@
                         mediaRecorder.start();
                     }
                 } catch(e) {
-                    alert("Camera Blocked. Switching to No-Cam.");
+                    alert("Camera blocked. Switching to No-Cam.");
                     config.cam = false;
                 }
             }
 
             if(!config.cam) {
                 document.getElementById('webcam').style.display = 'none';
-                document.getElementById('placeholder-ring').style.display = 'flex';
+                document.getElementById('placeholder').style.display = 'flex';
             }
 
-            // 3. Switch UI
-            document.getElementById('settings-view').style.display = 'none';
-            document.getElementById('hud-view').style.display = 'flex';
+            // 2. Build Schedule
+            const t = {
+                warm: parseInt(document.getElementById('in-warm').value) || 240,
+                work: parseInt(document.getElementById('in-work').value) || 40,
+                rest: parseInt(document.getElementById('in-rest').value) || 20,
+                cool: parseInt(document.getElementById('in-cool').value) || 120,
+                vis: parseInt(document.getElementById('in-vis').value) || 120
+            };
+            
+            schedule = [{dur:t.warm, lbl:"WARM UP"}];
+            for(let i=1; i<=12; i++) {
+                schedule.push({dur:t.work, lbl:`ROUND ${i} WORK`});
+                schedule.push({dur:t.rest, lbl:`ROUND ${i} REST`});
+            }
+            schedule.push({dur:t.cool, lbl:"COOLDOWN"});
+            schedule.push({dur:t.vis, lbl:"VISUALIZE"});
 
-            // 4. Build Schedule
-            buildSchedule(times);
+            // 3. Switch Screen
+            document.getElementById('scr-home').classList.remove('active');
+            document.getElementById('scr-hud').classList.add('active');
+            
+            // 4. Run
             runPhase();
         }
 
-        // === 3. ENGINE ===
-        let schedule = [];
-        
-        function buildSchedule(t) {
-            schedule = [{type:'warm', dur:t.warm, lbl:"WARM UP"}];
-            for(let i=1; i<=12; i++) {
-                schedule.push({type:'work', dur:t.work, lbl:`ROUND ${i} WORK`});
-                schedule.push({type:'rest', dur:t.rest, lbl:`ROUND ${i} REST`});
-            }
-            schedule.push({type:'cool', dur:t.cool, lbl:"COOLDOWN"});
-            schedule.push({type:'vis', dur:t.vis, lbl:"VISUALIZE"});
-        }
-
+        // === ENGINE ===
         const audio = new (window.AudioContext || window.webkitAudioContext)();
-        function beep(freq) {
-            let o = audio.createOscillator(), g = audio.createGain();
-            o.frequency.value = freq; o.connect(g); g.connect(audio.destination);
-            o.start(); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.15); o.stop(audio.currentTime+0.15);
+        function beep(f) {
+            let o=audio.createOscillator(), g=audio.createGain();
+            o.frequency.value=f; o.connect(g); g.connect(audio.destination);
+            o.start(); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.2); o.stop(audio.currentTime+0.2);
         }
 
         function runPhase() {
             if(session.phase >= schedule.length) { finishSession(); return; }
-            
             let p = schedule[session.phase];
             session.time = p.dur;
-            
-            document.getElementById('phase-display').innerText = p.lbl;
-            beep(p.type==='work'?880:440);
+            document.getElementById('phase-lbl').innerText = p.lbl;
+            beep(p.lbl.includes("WORK") ? 880 : 440);
 
             clearInterval(session.interval);
             session.interval = setInterval(() => {
                 if(!session.paused) {
                     session.time--;
-                    
-                    // Render
                     let m = Math.floor(session.time/60);
                     let s = session.time%60;
-                    document.getElementById('timer-display').innerText = `${m}:${s<10?'0':''}${s}`;
-                    
-                    let prog = 100 - ((session.time / p.dur) * 100);
-                    document.getElementById('progress-bar').style.width = prog + "%";
-
-                    if(session.time <= 0) {
-                        session.phase++;
-                        runPhase();
-                    }
+                    document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
+                    if(session.time<=0) { session.phase++; runPhase(); }
                 }
             }, 1000);
         }
@@ -417,17 +347,16 @@
         function finishSession() {
             clearInterval(session.interval);
             if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
-            
-            document.getElementById('phase-display').innerText = "COMPLETE";
-            document.getElementById('timer-display').innerText = "DONE";
-            document.querySelector('.hud-grid').style.display = 'none'; // Hide active controls
-            document.getElementById('post-actions').style.display = 'grid'; // Show save controls
+            document.getElementById('phase-lbl').innerText = "COMPLETE";
+            document.getElementById('timer').innerText = "DONE";
+            document.getElementById('active-ctrls').style.display = 'none';
+            document.getElementById('finish-ctrls').style.display = 'grid';
             beep(1000);
         }
 
         function saveVideo() {
             let a = document.createElement('a');
-            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_session_${Date.now()}.webm`;
+            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_v14_${Date.now()}.webm`;
             document.body.appendChild(a); a.click();
         }
     </script>
