@@ -3,270 +3,402 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        /* === CORE AESTHETICS === */
+        /* === APPLE-STYLE AESTHETICS === */
         :root {
-            --bg: #0a0a0a;
-            --surface: #161616;
-            --primary: #ffffff;
-            --accent: #3b82f6; /* Soft Blue */
-            --glass: rgba(255, 255, 255, 0.05);
-            --blur: 20px;
+            --bg: #000000;
+            --card: #1c1c1e;
+            --text: #ffffff;
+            --accent: #0a84ff; /* Apple Blue */
+            --danger: #ff453a; /* Apple Red */
+            --success: #30d158; /* Apple Green */
+            --glass: rgba(28, 28, 30, 0.6);
         }
 
         body {
             margin: 0;
             background-color: var(--bg);
-            color: var(--primary);
-            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
-            opacity: 0;
-            animation: fadeIn 1s ease forwards;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
         }
 
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        /* === SPLIT LAYOUT === */
-        #view-camera {
-            flex: 1;
-            position: relative;
-            background: #000;
-            overflow: hidden;
+        /* === TOP BAR (DATA) === */
+        #top-bar {
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #333;
+            z-index: 10;
         }
 
-        #view-controls {
+        .stat-pill {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #888;
+            display: flex;
+            gap: 8px;
+        }
+        .highlight { color: var(--text); }
+
+        /* === MAIN LAYOUT === */
+        #main-container {
             flex: 1;
             position: relative;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--surface);
-            backdrop-filter: blur(50px);
         }
 
-        /* === CAMERA FEED === */
+        /* Camera Layer */
+        #camera-layer {
+            flex: 1;
+            position: relative;
+            background: #111;
+            overflow: hidden;
+        }
+
         #webcam {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            opacity: 0.8;
-            filter: grayscale(20%) contrast(1.1); /* Cinematic Look */
         }
 
-        .rec-badge {
-            position: absolute;
-            top: 30px; left: 30px;
-            background: rgba(255, 255, 255, 0.9);
-            color: black;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        /* UI Layer (Right Side on Tablet, Bottom on Phone) */
+        #ui-layer {
+            width: 400px;
+            background: var(--card);
+            border-left: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            position: relative;
             transition: all 0.3s ease;
-            display: flex; align-items: center; gap: 6px;
+        }
+
+        /* === SETUP SCREEN === */
+        #setup-screen {
+            width: 100%;
+            height: 100%;
+            display: flex; /* Flex by default */
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title { font-size: 0.8rem; text-transform: uppercase; color: #666; font-weight: 900; letter-spacing: 1px; margin-bottom: 5px; }
+
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        
+        .option-btn {
+            background: #2c2c2e;
+            border: 1px solid transparent;
+            padding: 15px;
+            border-radius: 12px;
+            color: #aaa;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
         }
         
-        .rec-dot { width: 8px; height: 8px; background: #000; border-radius: 50%; }
-        .recording .rec-dot { background: #ff3b30; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        /* === THE HUD (Minimalist) === */
-        #canvas-wrapper {
-            position: relative;
-            width: 320px;
-            height: 320px;
-            margin-bottom: 40px;
+        .option-btn.active {
+            background: #3a3a3c;
+            border-color: var(--accent);
+            color: var(--text);
+            box-shadow: 0 0 15px rgba(10, 132, 255, 0.2);
         }
 
-        /* The Timer Text */
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: auto;
+        }
+        
+        .action-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+        /* === WORKOUT SCREEN (Hidden initially) === */
+        #workout-screen {
+            width: 100%;
+            height: 100%;
+            display: none; /* Hidden */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Clean Timer */
+        .timer-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin-bottom: 30px;
+        }
+
         #timer-text {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             font-size: 5rem;
-            font-weight: 300; /* Ultra Thin */
-            letter-spacing: -2px;
+            font-weight: 600;
             font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
         }
 
-        #phase-title {
-            font-size: 1.5rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-            opacity: 0.9;
-        }
+        #phase-label { font-size: 2rem; font-weight: 800; margin-bottom: 5px; text-align: center; }
+        #phase-detail { font-size: 1rem; color: #888; text-align: center; margin-bottom: 40px; }
 
-        #phase-sub {
-            font-size: 0.9rem;
-            opacity: 0.5;
-            margin-top: 8px;
-            font-weight: 300;
-        }
+        /* Controls */
+        .control-row { display: flex; gap: 15px; width: 100%; }
+        .secondary-btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; }
+        #btn-pause { background: #3a3a3c; color: white; }
+        #btn-finish { background: var(--danger); color: white; }
 
-        /* === BUTTONS (Glassmorphism) === */
-        .glass-btn {
-            margin-top: 50px;
-            padding: 18px 40px;
-            font-size: 1rem;
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            border-radius: 30px;
-            cursor: pointer;
+        /* Pause Overlay */
+        #pause-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(10px);
-            transition: transform 0.2s, background 0.2s;
-            font-weight: 500;
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 50;
+            font-size: 2rem; font-weight: 900; letter-spacing: 5px;
         }
 
-        .glass-btn:active { transform: scale(0.96); }
-        .glass-btn:hover { background: rgba(255,255,255,0.1); }
-        
-        #btn-start { display: none; background: white; color: black; font-weight: 800; border: none; }
-        #btn-dl { display: none; background: #3b82f6; border: none; }
-
-        /* Mobile Fix */
-        @media (max-width: 800px) {
+        /* Mobile Layout */
+        @media (max-width: 900px) {
             body { flex-direction: column; }
-            #view-camera { height: 45vh; border-radius: 0 0 30px 30px; z-index: 2; }
-            #view-controls { height: 55vh; margin-top: -30px; padding-top: 40px; }
-            #timer-text { font-size: 4rem; }
-            #canvas-wrapper { width: 260px; height: 260px; margin-bottom: 20px; }
+            #main-container { flex-direction: column; }
+            #ui-layer { width: 100%; height: 50%; border-left: none; border-top: 1px solid #333; }
+            #camera-layer { height: 50%; }
+            .timer-wrapper { width: 180px; height: 180px; margin-bottom: 10px; }
+            #timer-text { font-size: 3.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <div id="view-camera">
-        <div class="rec-badge" id="rec-ui">
-            <div class="rec-dot"></div>
-            <span id="rec-text">STANDBY</span>
-        </div>
-        <video id="webcam" autoplay playsinline muted></video>
+    <div id="top-bar">
+        <div class="stat-pill">🧠 NEURAL FLOW</div>
+        <div class="stat-pill">STREAK: <span class="highlight" id="streak-display">0</span> DAYS</div>
     </div>
 
-    <div id="view-controls">
+    <div id="main-container">
         
-        <div id="canvas-wrapper">
-            <canvas id="flowRing" width="320" height="320"></canvas>
-            <div id="timer-text">00:00</div>
+        <div id="camera-layer">
+            <video id="webcam" autoplay playsinline muted></video>
+            <div id="pause-overlay">PAUSED</div>
         </div>
 
-        <div id="phase-title">LOCKED</div>
-        <div id="phase-sub">Waiting for sensor permission</div>
+        <div id="ui-layer">
+            
+            <div id="setup-screen">
+                
+                <div>
+                    <div class="section-title">Body Condition</div>
+                    <div class="option-grid">
+                        <div class="option-btn active" onclick="setCondition('fresh', this)">⚡ Fresh</div>
+                        <div class="option-btn" onclick="setCondition('sore', this)">🩹 Sore/Tired</div>
+                    </div>
+                    <div id="condition-desc" style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">
+                        Standard High-Intensity Interval Training. Max BDNF.
+                    </div>
+                </div>
 
-        <button class="glass-btn" id="btn-perm" onclick="requestAccess()">Connect Camera</button>
-        <button class="glass-btn" id="btn-start" onclick="beginSession()">Start Flow</button>
-        <button class="glass-btn" id="btn-dl" onclick="saveSession()">Save Recording</button>
+                <div>
+                    <div class="section-title">Recording Quality</div>
+                    <div class="option-grid">
+                        <div class="option-btn" onclick="setQuality('low', this)">Low (Save Space)</div>
+                        <div class="option-btn active" onclick="setQuality('high', this)">HD (Clear)</div>
+                    </div>
+                </div>
 
+                <button class="action-btn" onclick="startSystem()">Start Session</button>
+            </div>
+
+            <div id="workout-screen">
+                <div class="timer-wrapper">
+                    <canvas id="ringCanvas" width="280" height="280"></canvas>
+                    <div id="timer-text">00:00</div>
+                </div>
+
+                <div id="phase-label">READY</div>
+                <div id="phase-detail">Get into position</div>
+
+                <div class="control-row">
+                    <button id="btn-pause" class="secondary-btn" onclick="togglePause()">PAUSE</button>
+                    <button id="btn-finish" class="secondary-btn" onclick="finishSession()">FINISH</button>
+                </div>
+                <button id="btn-dl" class="action-btn" style="margin-top:10px; display:none;" onclick="saveVideo()">Save Video</button>
+            </div>
+
+        </div>
     </div>
 
     <script>
-        // === 1. SMOOTH RENDER ENGINE ===
-        const canvas = document.getElementById('flowRing');
-        const ctx = canvas.getContext('2d');
-        let currentProgress = 1; // 0 to 1
-        let targetProgress = 1;
-        let ringColor = '#ffffff';
+        // === 1. DATA & STATE ===
+        let state = {
+            streak: parseInt(localStorage.getItem('neuralStreak') || 0),
+            lastWorkout: localStorage.getItem('neuralLastDate'),
+            condition: 'fresh',
+            quality: 'high',
+            isPaused: false,
+            phaseIdx: 0,
+            timeLeft: 0,
+            timer: null,
+            totalDuration: 0
+        };
 
-        function render() {
-            // Clear
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const r = 140;
+        // Update Streak UI
+        document.getElementById('streak-display').innerText = state.streak;
 
-            // Smooth Interpolation (High FPS feel)
-            currentProgress += (targetProgress - currentProgress) * 0.1;
+        // Exercise Database
+        const workouts = {
+            fresh: [
+                { type: 'warm', dur: 240, title: "WARM UP", sub: "Jog / Jacks / Dynamic Stretch" },
+                // Will generate 12 rounds of HIIT
+                { type: 'cool', dur: 120, title: "COOLDOWN", sub: "Walk & Box Breathe" },
+                { type: 'focus', dur: 120, title: "VISUALIZE", sub: "Stillness & Memory Palace" }
+            ],
+            sore: [
+                { type: 'warm', dur: 240, title: "MOBILITY", sub: "Arm Swings / Hip Rotations" },
+                // Will generate 12 rounds of LOW FLOW
+                { type: 'cool', dur: 120, title: "DEEP STRETCH", sub: "Hold Stretches 30s" },
+                { type: 'focus', dur: 120, title: "VISUALIZE", sub: "Stillness & Memory Palace" }
+            ]
+        };
 
-            // Background Track (Thin Grey)
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-            ctx.strokeStyle = "rgba(255,255,255,0.1)";
-            ctx.lineWidth = 4;
-            ctx.stroke();
+        let currentSchedule = [];
 
-            // Active Progress Ring (Round Caps)
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, -0.5 * Math.PI, (-0.5 * Math.PI) + (2 * Math.PI * currentProgress));
-            ctx.strokeStyle = ringColor;
-            ctx.lineWidth = 8;
-            ctx.lineCap = 'round'; // Smooth ends
-            ctx.stroke();
-
-            requestAnimationFrame(render);
+        // === 2. SETUP LOGIC ===
+        function setCondition(type, btn) {
+            state.condition = type;
+            document.querySelectorAll('.option-grid:first-of-type .option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const desc = document.getElementById('condition-desc');
+            if(type === 'fresh') desc.innerText = "Standard High-Intensity Interval Training. Max BDNF.";
+            else desc.innerText = "Active Recovery. Low impact flow to repair muscles.";
         }
-        render(); // Start Loop
 
-        // === 2. CAMERA & RECORDING ===
+        function setQuality(q, btn) {
+            state.quality = q;
+            document.querySelectorAll('.option-grid:last-of-type .option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // === 3. CAMERA & RECORDING ===
         let mediaRecorder;
         let chunks = [];
         let blobUrl;
 
-        async function requestAccess() {
+        async function startSystem() {
+            // Build Schedule
+            currentSchedule = [...workouts[state.condition]];
+            // Inject Rounds
+            const rounds = [];
+            for(let i=1; i<=12; i++) {
+                if(state.condition === 'fresh') {
+                    rounds.push({ type: 'work', dur: 40, title: `WORK ${i}/12`, sub: "Burpees / High Knees" });
+                    rounds.push({ type: 'rest', dur: 20, title: "REST", sub: "Recover" });
+                } else {
+                    rounds.push({ type: 'work', dur: 40, title: `FLOW ${i}/12`, sub: "Slow Squats / Glute Bridges" });
+                    rounds.push({ type: 'rest', dur: 20, title: "BREATHE", sub: "Shake it out" });
+                }
+            }
+            currentSchedule.splice(1, 0, ...rounds);
+
+            // Camera Constraints
+            const constraints = {
+                video: { 
+                    width: state.quality === 'high' ? { ideal: 1280 } : { ideal: 640 },
+                    height: state.quality === 'high' ? { ideal: 720 } : { ideal: 480 },
+                    facingMode: "user"
+                }, 
+                audio: false 
+            };
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 document.getElementById('webcam').srcObject = stream;
                 
-                // UI Transition
-                document.getElementById('btn-perm').style.display = 'none';
-                document.getElementById('btn-start').style.display = 'block';
-                document.getElementById('phase-title').innerText = "READY";
-                document.getElementById('phase-sub').innerText = "Position yourself in frame";
+                // Start Recording
+                setupRecording(stream);
 
-                // Setup Recorder
-                setupRec(stream);
+                // UI Transition
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('workout-screen').style.display = 'flex';
+
+                // Go Fullscreen
+                if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+
+                // Start Timer
+                runPhase();
+
             } catch (err) {
-                alert("Please check browser permissions.");
+                alert("Camera Error: " + err.message);
             }
         }
 
-        function setupRec(stream) {
-            const opts = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') 
-                ? { mimeType: 'video/webm; codecs=vp9' } 
-                : { mimeType: 'video/webm' };
-            mediaRecorder = new MediaRecorder(stream, opts);
+        function setupRecording(stream) {
+            const options = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') ? { mimeType: 'video/webm; codecs=vp9' } : { mimeType: 'video/webm' };
+            mediaRecorder = new MediaRecorder(stream, options);
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
             mediaRecorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
                 blobUrl = URL.createObjectURL(blob);
                 document.getElementById('btn-dl').style.display = 'block';
-                document.getElementById('rec-ui').classList.remove('recording');
-                document.getElementById('rec-text').innerText = "SAVED";
+                document.getElementById('btn-pause').style.display = 'none';
+                document.getElementById('btn-finish').style.display = 'none';
             };
+            mediaRecorder.start();
         }
 
-        // === 3. LOGIC ENGINE ===
-        const phases = [
-            { type: 'warmup', dur: 240, title: "Warm Up", sub: "Jog / Jacks / Dynamic Stretch", col: '#3b82f6' }, // Blue
-            // 12 Rounds
-            { type: 'cool', dur: 120, title: "Cooldown", sub: "Walk & Breathe", col: '#f59e0b' }, // Orange
-            { type: 'focus', dur: 120, title: "Visualize", sub: "Stillness & Palace", col: '#8b5cf6' } // Purple
-        ];
-        
-        // Inject HIIT
-        for(let i=1; i<=12; i++) {
-            phases.splice(i*2 - 1, 0, 
-                { type: 'work', dur: 40, title: `Work ${i}/12`, sub: "Max Intensity", col: '#10b981' }, // Green
-                { type: 'rest', dur: 20, title: "Rest", sub: "Recover", col: '#ef4444' } // Red
-            );
+        // === 4. TIMER ENGINE ===
+        const canvas = document.getElementById('ringCanvas');
+        const ctx = canvas.getContext('2d');
+        let ringProgress = 1;
+
+        function drawRing(color) {
+            ctx.clearRect(0, 0, 280, 280);
+            const cx = 140, cy = 140, r = 120;
+            
+            // Track
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.strokeStyle = "#2c2c2e";
+            ctx.lineWidth = 12;
+            ctx.stroke();
+
+            // Progress
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, -0.5 * Math.PI, (-0.5 * Math.PI) + (2 * Math.PI * ringProgress));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+            ctx.stroke();
         }
 
-        let phaseIdx = 0;
-        let timeLeft = 0;
-        let timerRef = null;
-
-        // Beep Sound
+        // Audio
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function beep(freq = 880) {
+        function beep(freq) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.frequency.value = freq;
@@ -277,73 +409,98 @@
             osc.stop(audioCtx.currentTime + 0.3);
         }
 
-        function beginSession() {
-            // Fullscreen
-            if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-            
-            // UI Update
-            document.getElementById('btn-start').style.display = 'none';
-            
-            // Rec Start
-            if(mediaRecorder.state === "inactive") {
-                mediaRecorder.start();
-                document.getElementById('rec-ui').classList.add('recording');
-                document.getElementById('rec-text').innerText = "REC";
-            }
-
-            phaseIdx = 0;
-            runPhase();
-        }
-
         function runPhase() {
-            if(phaseIdx >= phases.length) { finish(); return; }
-            
-            const p = phases[phaseIdx];
-            timeLeft = p.dur;
-            
-            // Update UI
-            document.getElementById('phase-title').innerText = p.title;
-            document.getElementById('phase-sub').innerText = p.sub;
-            ringColor = p.col;
-            
-            beep(p.type === 'work' ? 880 : 440);
+            if(state.phaseIdx >= currentSchedule.length) { finishSession(); return; }
 
-            clearInterval(timerRef);
-            timerRef = setInterval(() => {
-                // Update Logic
-                targetProgress = timeLeft / p.dur;
-                
-                // Format Time
-                const m = Math.floor(timeLeft / 60);
-                const s = timeLeft % 60;
-                document.getElementById('timer-text').innerText = `${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
+            const stage = currentSchedule[state.phaseIdx];
+            state.timeLeft = stage.dur;
+            state.totalDuration = stage.dur;
 
-                if(timeLeft <= 0) {
-                    phaseIdx++;
-                    runPhase();
-                } else {
-                    timeLeft--;
+            // UI Text
+            document.getElementById('phase-label').innerText = stage.title;
+            document.getElementById('phase-detail').innerText = stage.sub;
+            
+            // Color Logic
+            let color = '#fff';
+            if(stage.type === 'work') color = '#30d158'; // Green
+            if(stage.type === 'rest') color = '#ff453a'; // Red
+            if(stage.type === 'warm') color = '#0a84ff'; // Blue
+            if(stage.type === 'focus') color = '#bf5af2'; // Purple
+
+            beep(stage.type === 'work' ? 880 : 440);
+
+            clearInterval(state.timer);
+            state.timer = setInterval(() => {
+                if(!state.isPaused) {
+                    state.timeLeft--;
+                    
+                    // Render Ring
+                    ringProgress = state.timeLeft / state.totalDuration;
+                    drawRing(color);
+
+                    // Render Text
+                    const m = Math.floor(state.timeLeft / 60);
+                    const s = state.timeLeft % 60;
+                    document.getElementById('timer-text').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+
+                    if(state.timeLeft <= 0) {
+                        state.phaseIdx++;
+                        runPhase();
+                    }
                 }
             }, 1000);
+            drawRing(color); // Initial draw
         }
 
-        function finish() {
-            clearInterval(timerRef);
-            if(mediaRecorder.state === "recording") mediaRecorder.stop();
-            document.getElementById('phase-title').innerText = "Session Complete";
-            document.getElementById('phase-sub').innerText = "Go to Cold Shower";
-            targetProgress = 0;
+        // === 5. CONTROLS ===
+        function togglePause() {
+            state.isPaused = !state.isPaused;
+            const overlay = document.getElementById('pause-overlay');
+            const btn = document.getElementById('btn-pause');
+            
+            if(state.isPaused) {
+                if(mediaRecorder.state === 'recording') mediaRecorder.pause();
+                overlay.style.display = 'flex';
+                btn.innerText = "RESUME";
+                btn.style.background = '#30d158';
+            } else {
+                if(mediaRecorder.state === 'paused') mediaRecorder.resume();
+                overlay.style.display = 'none';
+                btn.innerText = "PAUSE";
+                btn.style.background = '#3a3a3c';
+            }
+        }
+
+        function finishSession() {
+            clearInterval(state.timer);
+            if(mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused') mediaRecorder.stop();
+            
+            // Logic: Update Streak
+            const today = new Date().toDateString();
+            if(state.lastWorkout !== today) {
+                state.streak++;
+                localStorage.setItem('neuralStreak', state.streak);
+                localStorage.setItem('neuralLastDate', today);
+                document.getElementById('streak-display').innerText = state.streak;
+            }
+
+            // UI
+            document.getElementById('phase-label').innerText = "COMPLETE";
+            document.getElementById('phase-detail').innerText = "Session logged. Save your video.";
+            document.getElementById('timer-text').innerText = "DONE";
+            drawRing('#fff');
             beep(1000);
         }
 
-        function saveSession() {
+        function saveVideo() {
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = blobUrl;
-            a.download = `flow_session_${Date.now()}.webm`;
+            a.download = `neural_workout_${new Date().toISOString().slice(0,10)}.webm`;
             document.body.appendChild(a);
             a.click();
         }
+
     </script>
 </body>
 </html>
