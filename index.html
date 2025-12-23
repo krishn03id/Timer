@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V17</title>
+    <title>NEURAL FLOW V18</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        /* === V17 TITANIUM === */
+        /* === V18 ARCHITECT THEME === */
         :root {
             --bg: #000000;
             --surface: #0a0a0a;
@@ -50,7 +50,7 @@
             display: flex; flex-direction: column; position: relative;
         }
 
-        /* HEADER (FIXED) */
+        /* HEADER */
         .header {
             flex: 0 0 70px; display: flex; align-items: center; justify-content: space-between;
             padding: 0 25px; border-bottom: 1px solid var(--border);
@@ -137,9 +137,15 @@
         .seg-btn.active { background: #333; color: #fff; }
         .save-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; }
 
-        /* EXERCISE LIST */
-        .ex-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem; color: #aaa; }
-        .ex-item { background: #151515; padding: 10px; border-radius: 8px; }
+        /* MANUAL LINKS */
+        .db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .db-btn {
+            background: #151515; border: 1px solid #222; color: #aaa; 
+            padding: 15px; border-radius: 8px; text-decoration: none; 
+            text-align: center; font-size: 0.85rem; font-weight: 600; 
+            transition: all 0.2s;
+        }
+        .db-btn:hover { background: #222; color: #fff; border-color: #444; }
 
         /* Mobile */
         @media (max-width: 900px) {
@@ -173,6 +179,11 @@
             <h2 style="margin:0;">Settings</h2>
             
             <div class="set-grp">
+                <div class="set-lbl">Session Config</div>
+                <div class="input-row"><label>Rounds</label><input type="number" id="in-rounds" class="num-in" value="12"></div>
+            </div>
+
+            <div class="set-grp">
                 <div class="set-lbl">Intervals (Seconds)</div>
                 <div class="input-row"><label>Warmup</label><input type="number" id="in-warm" class="num-in" value="240"></div>
                 <div class="input-row"><label>Work</label><input type="number" id="in-work" class="num-in" value="40"></div>
@@ -189,7 +200,7 @@
             </div>
 
             <div class="set-grp">
-                <div class="set-lbl">Video Quality (Bitrate)</div>
+                <div class="set-lbl">Video Quality</div>
                 <div class="seg-row">
                     <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
                     <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
@@ -212,43 +223,33 @@
     <div id="modal-info" class="modal">
         <div class="modal-card">
             <h2 style="margin:0;">Exercise Database</h2>
-            <p style="color:#aaa; font-size:0.9rem;">Comprehensive list of supported movements.</p>
+            <p style="color:#aaa; font-size:0.9rem;">Select a movement to view scientific details.</p>
 
-            <div class="set-lbl">WARM UP (4 MINS)</div>
-            <div class="ex-list" style="margin-bottom:20px;">
-                <div class="ex-item">Jumping Jacks</div>
-                <div class="ex-item">High Knees (Slow)</div>
-                <div class="ex-item">Arm Circles</div>
-                <div class="ex-item">Torso Twists</div>
-                <div class="ex-item">Hip Rotations</div>
-                <div class="ex-item">Neck Tilts</div>
-                <div class="ex-item">Ankle Rolls</div>
-                <div class="ex-item">Wrist Rotations</div>
+            <div class="set-lbl">WARM UP</div>
+            <div class="db-grid">
+                <a href="details.html?ex=jumping-jacks" class="db-btn">Jumping Jacks</a>
+                <a href="details.html?ex=high-knees" class="db-btn">High Knees</a>
+                <a href="details.html?ex=arm-circles" class="db-btn">Arm Circles</a>
+                <a href="details.html?ex=torso-twist" class="db-btn">Torso Twists</a>
             </div>
 
-            <div class="set-lbl">HIIT / WORK PHASE</div>
-            <div class="ex-list" style="margin-bottom:20px;">
-                <div class="ex-item">Burpees (Full)</div>
-                <div class="ex-item">Mountain Climbers</div>
-                <div class="ex-item">Sprint in Place</div>
-                <div class="ex-item">Jump Squats</div>
-                <div class="ex-item">Plank Jacks</div>
-                <div class="ex-item">Lunge Jumps</div>
-                <div class="ex-item">Pushups</div>
-                <div class="ex-item">Bicycle Crunch</div>
-                <div class="ex-item">Star Jumps</div>
-                <div class="ex-item">Broad Jumps</div>
+            <div class="set-lbl" style="margin-top:20px;">HIIT PHASE</div>
+            <div class="db-grid">
+                <a href="details.html?ex=burpees" class="db-btn">Burpees</a>
+                <a href="details.html?ex=mountain-climbers" class="db-btn">Mtn Climbers</a>
+                <a href="details.html?ex=jump-squats" class="db-btn">Jump Squats</a>
+                <a href="details.html?ex=plank-jacks" class="db-btn">Plank Jacks</a>
+                <a href="details.html?ex=sprints" class="db-btn">Sprints</a>
+                <a href="details.html?ex=lunge-jumps" class="db-btn">Lunge Jumps</a>
             </div>
 
-            <div class="set-lbl">COOLDOWN</div>
-            <div class="ex-list">
-                <div class="ex-item">Slow Walk</div>
-                <div class="ex-item">Hamstring Stretch</div>
-                <div class="ex-item">Quad Stretch</div>
-                <div class="ex-item">Child's Pose</div>
+            <div class="set-lbl" style="margin-top:20px;">COOLDOWN</div>
+            <div class="db-grid">
+                <a href="details.html?ex=walk" class="db-btn">Slow Walk</a>
+                <a href="details.html?ex=stretch" class="db-btn">Static Stretch</a>
             </div>
 
-            <button class="save-btn" onclick="closeModal('modal-info')">CLOSE</button>
+            <button class="save-btn" style="margin-top:20px;" onclick="closeModal('modal-info')">CLOSE MENU</button>
         </div>
     </div>
 
@@ -298,14 +299,13 @@
         // === 1. DATA ENGINE ===
         const db = {
             get: () => {
-                const s = localStorage.getItem('nf17_data');
+                const s = localStorage.getItem('nf18_data');
                 return s ? JSON.parse(s) : { streak: 0, logs: {} };
             },
-            save: (d) => localStorage.setItem('nf17_data', JSON.stringify(d)),
+            save: (d) => localStorage.setItem('nf18_data', JSON.stringify(d)),
             log: (dur, mode) => {
                 let d = db.get();
                 const date = new Date().toISOString().split('T')[0];
-                // Strict Streak: Only count if > 300 seconds (5 mins)
                 if (dur > 300) { 
                     if (!d.logs[date]) d.streak++;
                     d.logs[date] = { date: date, dur: dur, mode: mode };
@@ -384,7 +384,6 @@
         let schedule = [];
         let mediaRecorder, chunks=[], blobUrl;
         
-        // Text to Speech
         function speak(text) {
             if ('speechSynthesis' in window) {
                 const u = new SpeechSynthesisUtterance(text);
@@ -423,13 +422,15 @@
             }
 
             const t = {
+                rounds: parseInt(document.getElementById('in-rounds').value)||12,
                 warm: parseInt(document.getElementById('in-warm').value)||240,
                 work: parseInt(document.getElementById('in-work').value)||40,
                 rest: parseInt(document.getElementById('in-rest').value)||20,
                 cool: parseInt(document.getElementById('in-cool').value)||120
             };
+            
             schedule = [{d:t.warm, l:"WARM UP"}];
-            for(let i=1; i<=12; i++) {
+            for(let i=1; i<=t.rounds; i++) {
                 schedule.push({d:t.work, l:`R${i} WORK`});
                 schedule.push({d:t.rest, l:`R${i} REST`});
             }
@@ -458,7 +459,6 @@
                     let s = session.time%60;
                     document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
                     
-                    // Audio Countdown
                     if(session.time === 3) speak("Three");
                     if(session.time === 2) speak("Two");
                     if(session.time === 1) speak("One");
@@ -495,16 +495,13 @@
         function saveVideo() {
             let a = document.createElement('a');
             a.style.display = 'none'; 
-            // Format: HIIT-ddmmyyyy-time.webm
             const now = new Date();
             const day = String(now.getDate()).padStart(2, '0');
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const year = now.getFullYear();
             const time = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
             const filename = `HIIT-${day}${month}${year}-${time}.webm`;
-            
-            a.href = blobUrl; 
-            a.download = filename;
+            a.href = blobUrl; a.download = filename;
             document.body.appendChild(a); a.click();
         }
     </script>
