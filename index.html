@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V18</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW V19</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     <style>
-        /* === V18 ARCHITECT THEME === */
+        /* === V19 TITANIUM ARCHITECT === */
         :root {
             --bg: #000000;
             --surface: #0a0a0a;
+            --surface-light: #151515;
             --border: #222;
             --text-main: #ffffff;
-            --text-dim: #666;
+            --text-dim: #888;
             --action: #007AFF;
             --success: #32d74b;
             --danger: #FF3B30;
@@ -105,7 +106,7 @@
         }
         .act-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
 
-        /* MODALS */
+        /* === MODALS === */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 100; display: none;
@@ -137,15 +138,24 @@
         .seg-btn.active { background: #333; color: #fff; }
         .save-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; }
 
-        /* MANUAL LINKS */
+        /* MANUAL / DATABASE UI */
+        #search-bar {
+            width: 100%; padding: 15px; background: #111; border: 1px solid #333;
+            color: #fff; border-radius: 10px; font-size: 1rem; margin-bottom: 15px;
+        }
         .db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .db-btn {
-            background: #151515; border: 1px solid #222; color: #aaa; 
-            padding: 15px; border-radius: 8px; text-decoration: none; 
-            text-align: center; font-size: 0.85rem; font-weight: 600; 
+            background: var(--surface-light); border: 1px solid #222; color: #aaa; 
+            padding: 15px; border-radius: 8px; text-align: center; 
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
             transition: all 0.2s;
         }
         .db-btn:hover { background: #222; color: #fff; border-color: #444; }
+
+        /* EXERCISE DETAIL POPUP CONTENT */
+        .ex-detail-row { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .ex-label { color: var(--action); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+        .ex-val { font-size: 0.95rem; line-height: 1.5; color: #ddd; }
 
         /* Mobile */
         @media (max-width: 900px) {
@@ -220,36 +230,27 @@
         </div>
     </div>
 
-    <div id="modal-info" class="modal">
+    <div id="modal-library" class="modal">
         <div class="modal-card">
-            <h2 style="margin:0;">Exercise Database</h2>
-            <p style="color:#aaa; font-size:0.9rem;">Select a movement to view scientific details.</p>
-
-            <div class="set-lbl">WARM UP</div>
-            <div class="db-grid">
-                <a href="details.html?ex=jumping-jacks" class="db-btn">Jumping Jacks</a>
-                <a href="details.html?ex=high-knees" class="db-btn">High Knees</a>
-                <a href="details.html?ex=arm-circles" class="db-btn">Arm Circles</a>
-                <a href="details.html?ex=torso-twist" class="db-btn">Torso Twists</a>
+            <h2 style="margin:0;">Exercise Library</h2>
+            <p style="color:#666; font-size:0.85rem; margin-top:5px;">Select an exercise to view analysis.</p>
+            
+            <input type="text" id="search-bar" placeholder="Search exercises..." onkeyup="filterExercises()">
+            
+            <div id="library-grid" class="db-grid">
+                <div style="grid-column: span 2; color: #444; text-align: center; padding: 20px;">Loading Database...</div>
             </div>
 
-            <div class="set-lbl" style="margin-top:20px;">HIIT PHASE</div>
-            <div class="db-grid">
-                <a href="details.html?ex=burpees" class="db-btn">Burpees</a>
-                <a href="details.html?ex=mountain-climbers" class="db-btn">Mtn Climbers</a>
-                <a href="details.html?ex=jump-squats" class="db-btn">Jump Squats</a>
-                <a href="details.html?ex=plank-jacks" class="db-btn">Plank Jacks</a>
-                <a href="details.html?ex=sprints" class="db-btn">Sprints</a>
-                <a href="details.html?ex=lunge-jumps" class="db-btn">Lunge Jumps</a>
-            </div>
+            <button class="save-btn" style="margin-top:20px;" onclick="closeModal('modal-library')">CLOSE MENU</button>
+        </div>
+    </div>
 
-            <div class="set-lbl" style="margin-top:20px;">COOLDOWN</div>
-            <div class="db-grid">
-                <a href="details.html?ex=walk" class="db-btn">Slow Walk</a>
-                <a href="details.html?ex=stretch" class="db-btn">Static Stretch</a>
-            </div>
-
-            <button class="save-btn" style="margin-top:20px;" onclick="closeModal('modal-info')">CLOSE MENU</button>
+    <div id="modal-ex-detail" class="modal" style="z-index: 110;">
+        <div class="modal-card">
+            <h2 id="ex-title" style="margin:0; color:#fff; border-bottom:1px solid #333; padding-bottom:10px;">Exercise Name</h2>
+            <div id="ex-content" style="margin-top:20px;">
+                </div>
+            <button class="save-btn" onclick="closeModal('modal-ex-detail')">BACK</button>
         </div>
     </div>
 
@@ -269,7 +270,7 @@
                 </div>
                 <div class="head-btns">
                     <button class="icon-btn" onclick="openModal('modal-settings')">⚙️</button>
-                    <button class="icon-btn" onclick="openModal('modal-info')">?</button>
+                    <button class="icon-btn" onclick="openLibrary()">?</button>
                 </div>
             </div>
 
@@ -299,10 +300,10 @@
         // === 1. DATA ENGINE ===
         const db = {
             get: () => {
-                const s = localStorage.getItem('nf18_data');
+                const s = localStorage.getItem('nf19_data');
                 return s ? JSON.parse(s) : { streak: 0, logs: {} };
             },
-            save: (d) => localStorage.setItem('nf18_data', JSON.stringify(d)),
+            save: (d) => localStorage.setItem('nf19_data', JSON.stringify(d)),
             log: (dur, mode) => {
                 let d = db.get();
                 const date = new Date().toISOString().split('T')[0];
@@ -330,7 +331,63 @@
             el.classList.add('active');
         }
 
-        // === 3. VISUALIZATION ===
+        // === 3. EXERCISE LIBRARY ENGINE ===
+        let exerciseDB = []; // Will hold JSON data
+
+        async function loadExerciseData() {
+            try {
+                const response = await fetch('details.json');
+                if (!response.ok) throw new Error("JSON not found");
+                exerciseDB = await response.json();
+                renderLibrary(exerciseDB);
+            } catch (e) {
+                document.getElementById('library-grid').innerHTML = 
+                    `<div style="grid-column:span 2; color:#666; text-align:center;">
+                        Database file (details.json) missing.<br>Please create it.
+                     </div>`;
+            }
+        }
+
+        function renderLibrary(list) {
+            const grid = document.getElementById('library-grid');
+            grid.innerHTML = '';
+            list.forEach(ex => {
+                const btn = document.createElement('div');
+                btn.className = 'db-btn';
+                btn.innerText = ex.name;
+                btn.onclick = () => showExerciseDetail(ex);
+                grid.appendChild(btn);
+            });
+        }
+
+        function filterExercises() {
+            const query = document.getElementById('search-bar').value.toLowerCase();
+            const filtered = exerciseDB.filter(ex => ex.name.toLowerCase().includes(query));
+            renderLibrary(filtered);
+        }
+
+        function openLibrary() {
+            openModal('modal-library');
+            if(exerciseDB.length === 0) loadExerciseData();
+        }
+
+        function showExerciseDetail(ex) {
+            document.getElementById('ex-title').innerText = ex.name;
+            const content = document.getElementById('ex-content');
+            content.innerHTML = `
+                <div class="ex-detail-row"><div class="ex-label">Type</div><div class="ex-val">${ex.type}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Primary Muscles</div><div class="ex-val">${ex.muscles}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Movement Phases</div><div class="ex-val">${ex.phases}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Energy System</div><div class="ex-val">${ex.energy}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Key Benefits</div><div class="ex-val">${ex.benefits}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Common Mistakes</div><div class="ex-val">${ex.mistakes}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Regressions / Progressions</div><div class="ex-val">${ex.regress_progress}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Best Use</div><div class="ex-val">${ex.best_use}</div></div>
+            `;
+            openModal('modal-ex-detail');
+        }
+
+        // === 4. VISUALIZATION ===
         function openHistory() {
             const data = db.get();
             openModal('modal-history');
@@ -379,7 +436,7 @@
             document.getElementById('d-dur').innerText = Math.floor(log.dur/60) + "m " + (log.dur%60)+"s";
         }
 
-        // === 4. SESSION ENGINE ===
+        // === 5. SESSION ENGINE ===
         let session = { phase:0, time:0, interval:null, paused:false, elapsed:0 };
         let schedule = [];
         let mediaRecorder, chunks=[], blobUrl;
