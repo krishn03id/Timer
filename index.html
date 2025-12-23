@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V16</title>
+    <title>NEURAL FLOW V17</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        /* === V16 TITANIUM RESTORED === */
+        /* === V17 TITANIUM === */
         :root {
             --bg: #000000;
             --surface: #0a0a0a;
@@ -47,14 +47,12 @@
         /* RIGHT: CONTROLS */
         #controls {
             flex: 1; max-width: 500px; background: var(--surface);
-            display: flex; flex-direction: column; /* Stack Header + Screen */
-            position: relative;
+            display: flex; flex-direction: column; position: relative;
         }
 
-        /* HEADER (Fixed Height) */
+        /* HEADER (FIXED) */
         .header {
-            flex: 0 0 70px; /* FIXED HEIGHT - WONT DISAPPEAR */
-            display: flex; align-items: center; justify-content: space-between;
+            flex: 0 0 70px; display: flex; align-items: center; justify-content: space-between;
             padding: 0 25px; border-bottom: 1px solid var(--border);
             background: var(--surface); z-index: 10;
         }
@@ -62,7 +60,6 @@
         .title-group { display: flex; align-items: center; gap: 15px; }
         .title { font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
         
-        /* STREAK BUTTON */
         .streak-btn {
             background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3);
             color: #ff9f0a; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
@@ -71,7 +68,6 @@
         }
         .streak-btn:active { transform: scale(0.95); }
 
-        /* ICON BUTTONS */
         .head-btns { display: flex; gap: 10px; }
         .icon-btn {
             width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
@@ -80,7 +76,7 @@
         }
         .icon-btn:hover { background: #222; }
 
-        /* SCREENS (Take remaining space) */
+        /* SCREENS */
         .screen { 
             flex: 1; display: none; flex-direction: column; 
             align-items: center; justify-content: center; padding: 20px;
@@ -101,7 +97,7 @@
 
         /* HUD SCREEN */
         #timer { font-size: 5.5rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 40px; }
+        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 40px; text-align: center; }
         .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 350px; }
         .act-btn {
             padding: 20px; border-radius: 14px; border: 1px solid var(--border);
@@ -109,7 +105,7 @@
         }
         .act-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
 
-        /* === MODALS === */
+        /* MODALS */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 100; display: none;
@@ -123,27 +119,12 @@
         }
         
         /* DATA VIZ */
-        .chart-container {
-            width: 100%; height: 150px; background: #111; 
-            border-radius: 12px; border: 1px solid #222; position: relative;
-            padding: 10px;
-        }
+        .chart-container { width: 100%; height: 150px; background: #111; border-radius: 12px; border: 1px solid #222; position: relative; padding: 10px; }
         canvas { width: 100%; height: 100%; }
-
-        .calendar-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
-        }
-        .day-node {
-            aspect-ratio: 1; background: #1a1a1a; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; color: #444; cursor: pointer; border: 1px solid transparent;
-        }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .day-node { aspect-ratio: 1; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #444; cursor: pointer; border: 1px solid transparent; }
         .day-node.active { background: rgba(50, 215, 75, 0.2); border-color: var(--success); color: var(--success); font-weight: 700; }
-
-        .detail-box {
-            background: #111; border-radius: 12px; padding: 15px;
-            border: 1px solid #222; display: none;
-        }
+        .detail-box { background: #111; border-radius: 12px; padding: 15px; border: 1px solid #222; display: none; }
         .d-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
 
         /* SETTINGS UI */
@@ -155,6 +136,10 @@
         .seg-btn { flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; color: #666; cursor: pointer; border-radius: 8px; font-weight: 600; }
         .seg-btn.active { background: #333; color: #fff; }
         .save-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+
+        /* EXERCISE LIST */
+        .ex-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem; color: #aaa; }
+        .ex-item { background: #151515; padding: 10px; border-radius: 8px; }
 
         /* Mobile */
         @media (max-width: 900px) {
@@ -169,21 +154,16 @@
     <div id="modal-history" class="modal">
         <div class="modal-card">
             <h2 style="margin:0;">Progress Log</h2>
-            
             <div class="chart-container"><canvas id="progressGraph"></canvas></div>
-
             <div class="set-grp">
                 <div class="set-lbl">Last 14 Days</div>
                 <div class="calendar-grid" id="cal-grid"></div>
             </div>
-
             <div id="day-details" class="detail-box">
                 <div class="d-row"><span style="color:#666">Date</span><span id="d-date">--</span></div>
                 <div class="d-row"><span style="color:#666">Mode</span><span id="d-mode">--</span></div>
                 <div class="d-row"><span style="color:#666">Time</span><span id="d-dur">--</span></div>
-                <div style="margin-top:5px; pt-5; border-top:1px solid #222; color:#888; font-size:0.8rem;" id="d-ex"></div>
             </div>
-
             <button class="save-btn" onclick="closeModal('modal-history')">CLOSE</button>
         </div>
     </div>
@@ -198,14 +178,22 @@
                 <div class="input-row"><label>Work</label><input type="number" id="in-work" class="num-in" value="40"></div>
                 <div class="input-row"><label>Rest</label><input type="number" id="in-rest" class="num-in" value="20"></div>
                 <div class="input-row"><label>Cool</label><input type="number" id="in-cool" class="num-in" value="120"></div>
-                <div class="input-row"><label>Visual</label><input type="number" id="in-vis" class="num-in" value="120"></div>
             </div>
 
             <div class="set-grp">
-                <div class="set-lbl">Input</div>
+                <div class="set-lbl">Input Source</div>
                 <div class="seg-row">
                     <div class="seg-btn active" onclick="setOpt('cam', true, this)">Camera</div>
                     <div class="seg-btn" onclick="setOpt('cam', false, this)">No Cam</div>
+                </div>
+            </div>
+
+            <div class="set-grp">
+                <div class="set-lbl">Video Quality (Bitrate)</div>
+                <div class="seg-row">
+                    <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
+                    <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
+                    <div class="seg-btn active" onclick="setOpt('qual', 'high', this)">High</div>
                 </div>
             </div>
 
@@ -216,14 +204,6 @@
                     <div class="seg-btn" onclick="setOpt('mode', 'sore', this)">Sore</div>
                 </div>
             </div>
-             <div class="set-grp">
-                <div class="set-lbl">Recording Quality</div>
-                <div class="seg-row">
-                    <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
-                    <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
-                    <div class="seg-btn active" onclick="setOpt('qual', 'high', this)">High</div>
-                </div>
-            </div>
 
             <button class="save-btn" onclick="closeModal('modal-settings')">SAVE CONFIG</button>
         </div>
@@ -231,12 +211,44 @@
 
     <div id="modal-info" class="modal">
         <div class="modal-card">
-            <h2 style="margin:0;">Manual</h2>
-            <p style="color:#aaa;">HIIT Protocol for BDNF Production.</p>
-            <div style="background:rgba(255,59,48,0.1); color:#ff3b30; padding:15px; border-radius:10px; font-weight:700; font-size:0.9rem;">
-                ⚠ STREAK WARNING: Do not clear browser cache.
+            <h2 style="margin:0;">Exercise Database</h2>
+            <p style="color:#aaa; font-size:0.9rem;">Comprehensive list of supported movements.</p>
+
+            <div class="set-lbl">WARM UP (4 MINS)</div>
+            <div class="ex-list" style="margin-bottom:20px;">
+                <div class="ex-item">Jumping Jacks</div>
+                <div class="ex-item">High Knees (Slow)</div>
+                <div class="ex-item">Arm Circles</div>
+                <div class="ex-item">Torso Twists</div>
+                <div class="ex-item">Hip Rotations</div>
+                <div class="ex-item">Neck Tilts</div>
+                <div class="ex-item">Ankle Rolls</div>
+                <div class="ex-item">Wrist Rotations</div>
             </div>
-            <button class="save-btn" onclick="closeModal('modal-info')">OK</button>
+
+            <div class="set-lbl">HIIT / WORK PHASE</div>
+            <div class="ex-list" style="margin-bottom:20px;">
+                <div class="ex-item">Burpees (Full)</div>
+                <div class="ex-item">Mountain Climbers</div>
+                <div class="ex-item">Sprint in Place</div>
+                <div class="ex-item">Jump Squats</div>
+                <div class="ex-item">Plank Jacks</div>
+                <div class="ex-item">Lunge Jumps</div>
+                <div class="ex-item">Pushups</div>
+                <div class="ex-item">Bicycle Crunch</div>
+                <div class="ex-item">Star Jumps</div>
+                <div class="ex-item">Broad Jumps</div>
+            </div>
+
+            <div class="set-lbl">COOLDOWN</div>
+            <div class="ex-list">
+                <div class="ex-item">Slow Walk</div>
+                <div class="ex-item">Hamstring Stretch</div>
+                <div class="ex-item">Quad Stretch</div>
+                <div class="ex-item">Child's Pose</div>
+            </div>
+
+            <button class="save-btn" onclick="closeModal('modal-info')">CLOSE</button>
         </div>
     </div>
 
@@ -286,26 +298,24 @@
         // === 1. DATA ENGINE ===
         const db = {
             get: () => {
-                const s = localStorage.getItem('nf16_data');
+                const s = localStorage.getItem('nf17_data');
                 return s ? JSON.parse(s) : { streak: 0, logs: {} };
             },
-            save: (d) => localStorage.setItem('nf16_data', JSON.stringify(d)),
+            save: (d) => localStorage.setItem('nf17_data', JSON.stringify(d)),
             log: (dur, mode) => {
                 let d = db.get();
                 const date = new Date().toISOString().split('T')[0];
-                if (!d.logs[date]) d.streak++;
-                d.logs[date] = {
-                    date: date,
-                    dur: dur,
-                    mode: mode,
-                    ex: mode==='fresh'?"Burpees, Jumps":"Squats, Stretch"
-                };
-                db.save(d);
-                updateStreak(d.streak);
+                // Strict Streak: Only count if > 300 seconds (5 mins)
+                if (dur > 300) { 
+                    if (!d.logs[date]) d.streak++;
+                    d.logs[date] = { date: date, dur: dur, mode: mode };
+                    db.save(d);
+                    updateStreak(d.streak);
+                }
             }
         };
 
-        // === 2. UI LOGIC ===
+        // === 2. UI UTILS ===
         let config = { cam: true, qual: 'high', mode: 'fresh' };
         
         function updateStreak(s) { document.getElementById('streak-disp').innerText = s; }
@@ -325,7 +335,6 @@
             const data = db.get();
             openModal('modal-history');
             
-            // Calendar
             const grid = document.getElementById('cal-grid');
             grid.innerHTML = '';
             for (let i = 13; i >= 0; i--) {
@@ -338,7 +347,6 @@
                 grid.appendChild(node);
             }
 
-            // Graph
             const canvas = document.getElementById('progressGraph');
             const ctx = canvas.getContext('2d');
             const rect = canvas.parentElement.getBoundingClientRect();
@@ -369,25 +377,35 @@
             document.getElementById('d-date').innerText = log.date;
             document.getElementById('d-mode').innerText = log.mode.toUpperCase();
             document.getElementById('d-dur').innerText = Math.floor(log.dur/60) + "m " + (log.dur%60)+"s";
-            document.getElementById('d-ex').innerText = log.ex;
         }
 
         // === 4. SESSION ENGINE ===
         let session = { phase:0, time:0, interval:null, paused:false, elapsed:0 };
         let schedule = [];
         let mediaRecorder, chunks=[], blobUrl;
+        
+        // Text to Speech
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance(text);
+                u.rate = 1.2;
+                window.speechSynthesis.speak(u);
+            }
+        }
 
         async function startSystem() {
             if(config.cam) {
                 try {
-                    let w=1280, h=720;
-                    if(config.qual==='low') { w=640; h=480; }
-                    if(config.qual==='high') { w=1920; h=1080; }
+                    let w=1280, h=720, bitrate=2500000;
+                    if(config.qual==='low') { w=640; h=480; bitrate=1000000; }
+                    if(config.qual==='high') { w=1920; h=1080; bitrate=5000000; }
+                    
                     const stream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:w}, height:{ideal:h}, facingMode:'user'}});
                     document.getElementById('webcam').srcObject = stream;
                     
-                    if(MediaRecorder.isTypeSupported('video/webm')) {
-                        mediaRecorder = new MediaRecorder(stream, {mimeType:'video/webm'});
+                    const options = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: bitrate };
+                    if(MediaRecorder.isTypeSupported(options.mimeType)) {
+                        mediaRecorder = new MediaRecorder(stream, options);
                         mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
                         mediaRecorder.onstop = () => {
                             blobUrl = URL.createObjectURL(new Blob(chunks, {type:'video/webm'}));
@@ -396,7 +414,7 @@
                         mediaRecorder.start();
                     }
                 } catch(e) {
-                    alert("Cam Blocked"); config.cam = false;
+                    alert("Cam Blocked. No-Cam Mode Active."); config.cam = false;
                 }
             }
             if(!config.cam) {
@@ -408,8 +426,7 @@
                 warm: parseInt(document.getElementById('in-warm').value)||240,
                 work: parseInt(document.getElementById('in-work').value)||40,
                 rest: parseInt(document.getElementById('in-rest').value)||20,
-                cool: parseInt(document.getElementById('in-cool').value)||120,
-                vis: parseInt(document.getElementById('in-vis').value)||120
+                cool: parseInt(document.getElementById('in-cool').value)||120
             };
             schedule = [{d:t.warm, l:"WARM UP"}];
             for(let i=1; i<=12; i++) {
@@ -417,19 +434,13 @@
                 schedule.push({d:t.rest, l:`R${i} REST`});
             }
             schedule.push({d:t.cool, l:"COOLDOWN"});
-            schedule.push({d:t.vis, l:"VISUALIZE"});
+            schedule.push({d:120, l:"VISUALIZE"});
 
             document.getElementById('scr-home').classList.remove('active');
             document.getElementById('scr-hud').classList.add('active');
             session.elapsed = 0;
+            speak("System initialized. Starting Warmup.");
             runPhase();
-        }
-
-        const audio = new (window.AudioContext || window.webkitAudioContext)();
-        function beep(f) {
-            let o=audio.createOscillator(), g=audio.createGain();
-            o.frequency.value=f; o.connect(g); g.connect(audio.destination);
-            o.start(); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.2); o.stop(audio.currentTime+0.2);
         }
 
         function runPhase() {
@@ -437,7 +448,6 @@
             let p = schedule[session.phase];
             session.time = p.d;
             document.getElementById('phase-lbl').innerText = p.l;
-            beep(p.l.includes("WORK")?880:440);
 
             clearInterval(session.interval);
             session.interval = setInterval(() => {
@@ -447,6 +457,12 @@
                     let m = Math.floor(session.time/60);
                     let s = session.time%60;
                     document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
+                    
+                    // Audio Countdown
+                    if(session.time === 3) speak("Three");
+                    if(session.time === 2) speak("Two");
+                    if(session.time === 1) speak("One");
+
                     if(session.time<=0) { session.phase++; runPhase(); }
                 }
             }, 1000);
@@ -467,18 +483,28 @@
         function finishSession() {
             clearInterval(session.interval);
             if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
-            if(session.elapsed > 60) db.log(session.elapsed, config.mode);
+            db.log(session.elapsed, config.mode);
             
             document.getElementById('phase-lbl').innerText = "COMPLETE";
             document.getElementById('timer').innerText = "DONE";
             document.getElementById('active-ctrls').style.display = 'none';
             document.getElementById('finish-ctrls').style.display = 'grid';
-            beep(1000);
+            speak("Session Complete.");
         }
 
         function saveVideo() {
             let a = document.createElement('a');
-            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_v16_${Date.now()}.webm`;
+            a.style.display = 'none'; 
+            // Format: HIIT-ddmmyyyy-time.webm
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const time = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+            const filename = `HIIT-${day}${month}${year}-${time}.webm`;
+            
+            a.href = blobUrl; 
+            a.download = filename;
             document.body.appendChild(a); a.click();
         }
     </script>
