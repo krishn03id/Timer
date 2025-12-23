@@ -2,112 +2,517 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURAL FLOW V14 - Advanced Timer</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="modal.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEURAL FLOW V15</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* === V15 FLUID TITANIUM === */
+        :root {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --surface-glass: rgba(20, 20, 20, 0.7);
+            --border: #222;
+            --text-main: #ffffff;
+            --text-dim: #666;
+            --accent: #ffffff;
+            --action: #007AFF;
+            --success: #32d74b;
+            --graph-line: #007AFF;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; background: var(--bg); color: var(--text-main);
+            font-family: 'Inter', sans-serif; height: 100vh; width: 100vw;
+            overflow: hidden; display: flex; opacity: 0; animation: fadeIn 0.6s ease forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* === LAYOUT === */
+        #app { display: flex; width: 100%; height: 100%; }
+
+        /* LEFT: MONITOR */
+        #monitor {
+            flex: 1; position: relative; background: #050505;
+            border-right: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; }
+        #placeholder { 
+            width: 200px; height: 200px; border: 2px solid #333; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; 
+            font-size: 0.8rem; letter-spacing: 2px; color: #444; font-weight: 700;
+        }
+
+        /* RIGHT: CONTROLS */
+        #controls {
+            flex: 1; max-width: 500px; background: var(--surface);
+            display: flex; flex-direction: column; position: relative;
+        }
+
+        /* HEADER */
+        .header {
+            height: 70px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 25px; border-bottom: 1px solid var(--border);
+        }
+        .title-group { display: flex; align-items: center; gap: 10px; }
+        .title { font-weight: 900; letter-spacing: -0.5px; font-size: 1.1rem; }
+        
+        /* STREAK BADGE */
+        .streak-btn {
+            background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3);
+            color: #ff9f0a; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.1s;
+        }
+        .streak-btn:active { transform: scale(0.95); }
+
+        .head-btns { display: flex; gap: 10px; }
+        .icon-btn {
+            width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
+            background: transparent; color: #fff; cursor: pointer; display: flex; 
+            align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;
+        }
+        .icon-btn:hover { background: #111; }
+
+        /* SCREENS */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
+        .screen.active { display: flex; }
+
+        /* HOME SCREEN */
+        .big-btn {
+            width: 260px; height: 260px; border-radius: 50%; border: 4px solid #333;
+            background: transparent; color: #fff; font-size: 1.2rem; font-weight: 800;
+            cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; gap: 10px;
+        }
+        .big-btn:hover { border-color: #fff; box-shadow: 0 0 80px rgba(255,255,255,0.1); }
+        .big-btn:active { transform: scale(0.95); }
+        .sub-txt { font-size: 0.8rem; color: #666; font-weight: 500; text-transform: uppercase; }
+
+        /* HUD SCREEN */
+        #timer { font-size: 6rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 50px; }
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 400px; }
+        .act-btn {
+            padding: 25px; border-radius: 14px; border: 1px solid var(--border);
+            background: #111; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
+        }
+        .act-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
+
+        /* === MODALS (Fluid Glass) === */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 100; display: none;
+            backdrop-filter: blur(20px); align-items: center; justify-content: center;
+        }
+        .modal-card {
+            background: rgba(15, 15, 15, 0.95); width: 95%; max-width: 500px; max-height: 85vh;
+            border: 1px solid var(--border); border-radius: 24px; padding: 30px;
+            overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        
+        /* DATA DASHBOARD STYLES */
+        .chart-container {
+            width: 100%; height: 150px; background: #111; 
+            border-radius: 12px; border: 1px solid #222; position: relative;
+            padding: 10px; box-sizing: border-box;
+        }
+        canvas { width: 100%; height: 100%; }
+
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 10px;
+        }
+        .day-node {
+            aspect-ratio: 1; background: #1a1a1a; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; color: #444; cursor: pointer; border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .day-node.active { background: rgba(50, 215, 75, 0.2); border-color: var(--success); color: var(--success); font-weight: 700; }
+        .day-node:hover { background: #222; }
+
+        .detail-box {
+            background: #111; border-radius: 12px; padding: 20px;
+            border: 1px solid #222; display: none;
+        }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .detail-row:last-child { margin-bottom: 0; }
+        .d-lbl { color: #666; }
+        .d-val { color: #fff; font-weight: 600; }
+
+        /* SETTINGS UI */
+        .set-grp { margin-bottom: 15px; }
+        .set-lbl { font-size: 0.7rem; text-transform: uppercase; color: #666; font-weight: 700; margin-bottom: 8px; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px; }
+        .num-in { background: #111; border: 1px solid #333; color: #fff; width: 70px; padding: 8px; text-align: center; border-radius: 6px; }
+        .seg-row { display: flex; background: #111; padding: 4px; border-radius: 10px; }
+        .seg-btn { flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; color: #666; cursor: pointer; border-radius: 8px; font-weight: 600; }
+        .seg-btn.active { background: #333; color: #fff; }
+        .save-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+
+        /* Mobile */
+        @media (max-width: 900px) {
+            #app { flex-direction: column; }
+            #monitor { height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+            #controls { height: 60vh; max-width: 100%; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Main Timer Section -->
-        <div class="timer-section">
-            <h1 class="app-title">NEURAL FLOW V14</h1>
+
+    <div id="modal-history" class="modal">
+        <div class="modal-card">
+            <h2 style="margin:0;">Neural Logs</h2>
+            <div style="font-size:0.8rem; color:#666;">Performance Timeline</div>
+
+            <div class="chart-container">
+                <canvas id="progressGraph"></canvas>
+            </div>
+
+            <div class="set-grp">
+                <div class="set-lbl">Recent Activity</div>
+                <div class="calendar-grid" id="cal-grid">
+                    </div>
+            </div>
+
+            <div id="day-details" class="detail-box">
+                <div class="detail-row"><span class="d-lbl">Date</span><span class="d-val" id="d-date">--</span></div>
+                <div class="detail-row"><span class="d-lbl">Mode</span><span class="d-val" id="d-mode">--</span></div>
+                <div class="detail-row"><span class="d-lbl">Duration</span><span class="d-val" id="d-dur">--</span></div>
+                <div class="detail-row"><span class="d-lbl">Completed</span><span class="d-val" id="d-time">--</span></div>
+                <div style="margin-top:10px; pt-10; border-top:1px solid #222; color:#888; font-size:0.8rem;" id="d-ex"></div>
+            </div>
+
+            <button class="save-btn" onclick="closeModal('modal-history')">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="modal">
+        <div class="modal-card">
+            <h2 style="margin:0;">Settings</h2>
             
-            <!-- Display -->
-            <div class="display-wrapper">
-                <div class="time-display" id="timeDisplay">25:00</div>
-                <div class="sub-display" id="subDisplay">Focus Session</div>
+            <div class="set-grp">
+                <div class="set-lbl">Timers (Seconds)</div>
+                <div class="input-row"><label>Warmup</label><input type="number" id="in-warm" class="num-in" value="240"></div>
+                <div class="input-row"><label>Work</label><input type="number" id="in-work" class="num-in" value="40"></div>
+                <div class="input-row"><label>Rest</label><input type="number" id="in-rest" class="num-in" value="20"></div>
+                <div class="input-row"><label>Cool</label><input type="number" id="in-cool" class="num-in" value="120"></div>
+                <div class="input-row"><label>Visual</label><input type="number" id="in-vis" class="num-in" value="120"></div>
             </div>
 
-            <!-- Controls -->
-            <div class="controls">
-                <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">Start</button>
-                <button class="btn btn-secondary" id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
-                <button class="btn btn-danger" id="resetBtn" onclick="resetTimer()">Reset</button>
-                <button class="btn btn-streak" id="streakBtn" onclick="openStreakModal()">📊 Streak</button>
-            </div>
-
-            <!-- Settings -->
-            <div class="settings">
-                <div class="setting-group">
-                    <label for="focusTime">Focus Duration (min):</label>
-                    <input type="number" id="focusTime" value="25" min="1" max="60">
-                </div>
-                <div class="setting-group">
-                    <label for="breakTime">Break Duration (min):</label>
-                    <input type="number" id="breakTime" value="5" min="1" max="30">
+            <div class="set-grp">
+                <div class="set-lbl">Input Source</div>
+                <div class="seg-row">
+                    <div class="seg-btn active" onclick="setOpt('cam', true, this)">Camera</div>
+                    <div class="seg-btn" onclick="setOpt('cam', false, this)">No Cam</div>
                 </div>
             </div>
 
-            <!-- Session Info -->
-            <div class="session-info">
-                <div class="info-item">
-                    <span class="label">Session:</span>
-                    <span class="value" id="sessionCount">1</span>
+            <div class="set-grp">
+                <div class="set-lbl">Quality</div>
+                <div class="seg-row">
+                    <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
+                    <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
+                    <div class="seg-btn active" onclick="setOpt('qual', 'high', this)">High</div>
                 </div>
-                <div class="info-item">
-                    <span class="label">Total Focus:</span>
-                    <span class="value" id="totalFocus">0h 0m</span>
+            </div>
+
+            <div class="set-grp">
+                <div class="set-lbl">Physiology</div>
+                <div class="seg-row">
+                    <div class="seg-btn active" onclick="setOpt('mode', 'fresh', this)">Fresh</div>
+                    <div class="seg-btn" onclick="setOpt('mode', 'sore', this)">Sore</div>
                 </div>
-                <div class="info-item">
-                    <span class="label">Current Streak:</span>
-                    <span class="value" id="currentStreak">0 days</span>
+            </div>
+
+            <button class="save-btn" onclick="closeModal('modal-settings')">SAVE CONFIG</button>
+        </div>
+    </div>
+
+    <div id="app">
+        <div id="monitor">
+            <video id="webcam" autoplay playsinline muted></video>
+            <div id="placeholder">NO SIGNAL</div>
+        </div>
+
+        <div id="controls">
+            <div class="header">
+                <div class="title-group">
+                    <div class="title">NEURAL FLOW v15</div>
+                    <button class="streak-btn" onclick="openHistory()">
+                        <span>🔥</span> <span id="streak-disp">0</span>
+                    </button>
+                </div>
+                <div class="head-btns">
+                    <button class="icon-btn" onclick="openModal('modal-settings')">⚙️</button>
+                </div>
+            </div>
+
+            <div id="scr-home" class="screen active">
+                <button class="big-btn" onclick="startSystem()">
+                    <div>INITIALIZE</div>
+                    <div class="sub-txt">SYSTEM READY</div>
+                </button>
+            </div>
+
+            <div id="scr-hud" class="screen">
+                <div id="timer">00:00</div>
+                <div id="phase-lbl">READY</div>
+                <div class="hud-grid" id="active-ctrls">
+                    <button class="act-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
+                    <button class="act-btn finish" onclick="finishSession()">FINISH</button>
+                </div>
+                <div class="hud-grid" id="finish-ctrls" style="display:none;">
+                    <button class="act-btn" id="btn-dl" style="background:#007aff; display:none;" onclick="saveVideo()">SAVE</button>
+                    <button class="act-btn" onclick="location.reload()">HOME</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Streak Calendar Modal (Glassmorphism) -->
-    <div class="modal-overlay" id="streakModalOverlay" onclick="closeStreakModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h2>Streak Calendar</h2>
-                <button class="modal-close" onclick="closeStreakModal()">×</button>
-            </div>
+    <script>
+        // === 1. DATA ENGINE ===
+        const db = {
+            get: () => {
+                const s = localStorage.getItem('nf15_data');
+                return s ? JSON.parse(s) : { streak: 0, logs: {} };
+            },
+            save: (data) => localStorage.setItem('nf15_data', JSON.stringify(data)),
+            logSession: (duration, mode) => {
+                let data = db.get();
+                const today = new Date().toISOString().split('T')[0];
+                const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Streak Logic
+                if (!data.logs[today]) {
+                    data.streak++;
+                }
+                
+                // Save Log
+                data.logs[today] = {
+                    date: today,
+                    time: now,
+                    dur: duration,
+                    mode: mode,
+                    ex: mode === 'fresh' ? "Burpees, Mtn Climbers, Jumps" : "Squats, Bridges, Mobility"
+                };
+                
+                db.save(data);
+                updateStreakUI(data.streak);
+            }
+        };
+
+        // === 2. UI LOGIC ===
+        let config = { cam: true, qual: 'high', mode: 'fresh' };
+        
+        function updateStreakUI(s) { document.getElementById('streak-disp').innerText = s; }
+        updateStreakUI(db.get().streak);
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function setOpt(key, val, el) {
+            config[key] = val;
+            for(let c of el.parentElement.children) c.classList.remove('active');
+            el.classList.add('active');
+        }
+
+        // === 3. VISUALIZATION ENGINE (Graph + Calendar) ===
+        function openHistory() {
+            const data = db.get();
+            openModal('modal-history');
+            renderCalendar(data.logs);
+            renderGraph(data.logs);
+        }
+
+        function renderCalendar(logs) {
+            const grid = document.getElementById('cal-grid');
+            grid.innerHTML = '';
+            // Generate last 14 days
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const iso = d.toISOString().split('T')[0];
+                const dayNum = d.getDate();
+                
+                const node = document.createElement('div');
+                node.className = logs[iso] ? 'day-node active' : 'day-node';
+                node.innerText = dayNum;
+                if(logs[iso]) {
+                    node.onclick = () => showDetails(logs[iso]);
+                }
+                grid.appendChild(node);
+            }
+        }
+
+        function showDetails(log) {
+            document.getElementById('day-details').style.display = 'block';
+            document.getElementById('d-date').innerText = log.date;
+            document.getElementById('d-mode').innerText = log.mode.toUpperCase();
+            document.getElementById('d-dur').innerText = Math.floor(log.dur/60) + " min";
+            document.getElementById('d-time').innerText = log.time;
+            document.getElementById('d-ex').innerText = log.ex;
+        }
+
+        function renderGraph(logs) {
+            const canvas = document.getElementById('progressGraph');
+            const ctx = canvas.getContext('2d');
+            // Resize
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            // Clear
+            ctx.clearRect(0,0,canvas.width, canvas.height);
             
-            <div class="modal-body">
-                <!-- Month Navigation -->
-                <div class="month-nav">
-                    <button class="nav-btn" onclick="previousMonth()">←</button>
-                    <h3 id="monthDisplay">December 2025</h3>
-                    <button class="nav-btn" onclick="nextMonth()">→</button>
-                </div>
+            // Get last 7 days data points
+            let points = [];
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const iso = d.toISOString().split('T')[0];
+                points.push(logs[iso] ? logs[iso].dur : 0);
+            }
 
-                <!-- Calendar Grid -->
-                <div class="calendar-grid">
-                    <div class="weekday">Sun</div>
-                    <div class="weekday">Mon</div>
-                    <div class="weekday">Tue</div>
-                    <div class="weekday">Wed</div>
-                    <div class="weekday">Thu</div>
-                    <div class="weekday">Fri</div>
-                    <div class="weekday">Sat</div>
-                    <div id="calendarDays"></div>
-                </div>
+            // Draw Line
+            ctx.beginPath();
+            ctx.strokeStyle = '#007AFF';
+            ctx.lineWidth = 2;
+            const stepX = canvas.width / 6;
+            const maxY = Math.max(...points, 600); // Scale based on max or 10 mins
+            
+            points.forEach((val, i) => {
+                const x = i * stepX;
+                const y = canvas.height - ((val / maxY) * canvas.height * 0.8) - 10;
+                if(i===0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                
+                // Draw Dot
+                ctx.fillStyle = val > 0 ? '#fff' : '#333';
+                ctx.fillRect(x-2, y-2, 4, 4);
+            });
+            ctx.stroke();
+        }
 
-                <!-- Streak Stats -->
-                <div class="streak-stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Current Streak</div>
-                        <div class="stat-value" id="modalCurrentStreak">0</div>
-                        <div class="stat-unit">days</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Longest Streak</div>
-                        <div class="stat-value" id="modalLongestStreak">0</div>
-                        <div class="stat-unit">days</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Total Sessions</div>
-                        <div class="stat-value" id="modalTotalSessions">0</div>
-                        <div class="stat-unit">sessions</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        // === 4. SESSION ENGINE ===
+        let session = { phase:0, time:0, interval:null, paused:false, elapsed:0 };
+        let schedule = [];
+        let mediaRecorder, chunks=[], blobUrl;
 
-    <script src="script.js"></script>
-    <script src="streak.js"></script>
+        async function startSystem() {
+            // Camera
+            if(config.cam) {
+                try {
+                    let w=1280, h=720;
+                    if(config.qual==='low') { w=640; h=480; }
+                    if(config.qual==='high') { w=1920; h=1080; }
+                    const stream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:w}, height:{ideal:h}, facingMode:'user'}});
+                    document.getElementById('webcam').srcObject = stream;
+                    
+                    if(MediaRecorder.isTypeSupported('video/webm')) {
+                        mediaRecorder = new MediaRecorder(stream, {mimeType:'video/webm'});
+                        mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+                        mediaRecorder.onstop = () => {
+                            blobUrl = URL.createObjectURL(new Blob(chunks, {type:'video/webm'}));
+                            document.getElementById('btn-dl').style.display = 'block';
+                        };
+                        mediaRecorder.start();
+                    }
+                } catch(e) {
+                    alert("Camera Blocked. No-Cam Mode.");
+                    config.cam = false;
+                }
+            }
+            if(!config.cam) {
+                document.getElementById('webcam').style.display='none';
+                document.getElementById('placeholder').style.display='flex';
+            }
+
+            // Schedule
+            const t = {
+                warm: parseInt(document.getElementById('in-warm').value)||240,
+                work: parseInt(document.getElementById('in-work').value)||40,
+                rest: parseInt(document.getElementById('in-rest').value)||20,
+                cool: parseInt(document.getElementById('in-cool').value)||120,
+                vis: parseInt(document.getElementById('in-vis').value)||120
+            };
+            schedule = [{d:t.warm, l:"WARM UP"}];
+            for(let i=1; i<=12; i++) {
+                schedule.push({d:t.work, l:`R${i} WORK`});
+                schedule.push({d:t.rest, l:`R${i} REST`});
+            }
+            schedule.push({d:t.cool, l:"COOLDOWN"});
+            schedule.push({d:t.vis, l:"VISUALIZE"});
+
+            document.getElementById('scr-home').classList.remove('active');
+            document.getElementById('scr-hud').classList.add('active');
+            session.elapsed = 0;
+            runPhase();
+        }
+
+        const audio = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(f) {
+            let o=audio.createOscillator(), g=audio.createGain();
+            o.frequency.value=f; o.connect(g); g.connect(audio.destination);
+            o.start(); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.2); o.stop(audio.currentTime+0.2);
+        }
+
+        function runPhase() {
+            if(session.phase >= schedule.length) { finishSession(); return; }
+            let p = schedule[session.phase];
+            session.time = p.d;
+            document.getElementById('phase-lbl').innerText = p.l;
+            beep(p.l.includes("WORK")?880:440);
+
+            clearInterval(session.interval);
+            session.interval = setInterval(() => {
+                if(!session.paused) {
+                    session.time--;
+                    session.elapsed++;
+                    let m = Math.floor(session.time/60);
+                    let s = session.time%60;
+                    document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
+                    if(session.time<=0) { session.phase++; runPhase(); }
+                }
+            }, 1000);
+        }
+
+        function togglePause() {
+            session.paused = !session.paused;
+            let btn = document.getElementById('btn-pause');
+            if(session.paused) {
+                if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.pause();
+                btn.innerText = "RESUME";
+            } else {
+                if(mediaRecorder && mediaRecorder.state==='paused') mediaRecorder.resume();
+                btn.innerText = "PAUSE";
+            }
+        }
+
+        function finishSession() {
+            clearInterval(session.interval);
+            if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
+            
+            // Save Data
+            if(session.elapsed > 300) { // Min 5 mins to count
+                db.logSession(session.elapsed, config.mode);
+            }
+
+            document.getElementById('phase-lbl').innerText = "COMPLETE";
+            document.getElementById('timer').innerText = "DONE";
+            document.getElementById('active-ctrls').style.display = 'none';
+            document.getElementById('finish-ctrls').style.display = 'grid';
+            beep(1000);
+        }
+
+        function saveVideo() {
+            let a = document.createElement('a');
+            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_v15_${Date.now()}.webm`;
+            document.body.appendChild(a); a.click();
+        }
+    </script>
 </body>
 </html>
