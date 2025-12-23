@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V19</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW V21</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        /* === V19 TITANIUM ARCHITECT === */
+        /* === V21 TITANIUM DIRECTOR === */
         :root {
             --bg: #000000;
             --surface: #0a0a0a;
@@ -98,7 +98,7 @@
 
         /* HUD SCREEN */
         #timer { font-size: 5.5rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 40px; text-align: center; }
+        #phase-lbl { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; margin-bottom: 40px; text-align: center; line-height: 1.1; color: var(--action); }
         .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 350px; }
         .act-btn {
             padding: 20px; border-radius: 14px; border: 1px solid var(--border);
@@ -106,7 +106,7 @@
         }
         .act-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
 
-        /* === MODALS === */
+        /* MODALS */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 100; display: none;
@@ -138,21 +138,17 @@
         .seg-btn.active { background: #333; color: #fff; }
         .save-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; }
 
-        /* MANUAL / DATABASE UI */
-        #search-bar {
-            width: 100%; padding: 15px; background: #111; border: 1px solid #333;
-            color: #fff; border-radius: 10px; font-size: 1rem; margin-bottom: 15px;
-        }
-        .db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .db-btn {
-            background: var(--surface-light); border: 1px solid #222; color: #aaa; 
-            padding: 15px; border-radius: 8px; text-align: center; 
-            font-size: 0.85rem; font-weight: 600; cursor: pointer;
-            transition: all 0.2s;
-        }
-        .db-btn:hover { background: #222; color: #fff; border-color: #444; }
+        /* LIBRARY & FILTERS */
+        #search-bar { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: #fff; border-radius: 10px; font-size: 1rem; margin-bottom: 10px; }
+        
+        .cat-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+        .cat-chip { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .cat-chip.active { background: #333; color: #fff; border-color: #666; }
 
-        /* EXERCISE DETAIL POPUP CONTENT */
+        .db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .db-btn { background: var(--surface-light); border: 1px solid #222; color: #aaa; padding: 15px; border-radius: 8px; text-align: center; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .db-btn:hover { background: #222; color: #fff; border-color: #444; }
+        
         .ex-detail-row { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
         .ex-label { color: var(--action); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
         .ex-val { font-size: 0.95rem; line-height: 1.5; color: #ddd; }
@@ -177,7 +173,7 @@
             </div>
             <div id="day-details" class="detail-box">
                 <div class="d-row"><span style="color:#666">Date</span><span id="d-date">--</span></div>
-                <div class="d-row"><span style="color:#666">Mode</span><span id="d-mode">--</span></div>
+                <div class="d-row"><span style="color:#666">Focus</span><span id="d-mode">--</span></div>
                 <div class="d-row"><span style="color:#666">Time</span><span id="d-dur">--</span></div>
             </div>
             <button class="save-btn" onclick="closeModal('modal-history')">CLOSE</button>
@@ -186,61 +182,66 @@
 
     <div id="modal-settings" class="modal">
         <div class="modal-card">
-            <h2 style="margin:0;">Settings</h2>
+            <h2 style="margin:0;">Configuration</h2>
             
             <div class="set-grp">
                 <div class="set-lbl">Session Config</div>
-                <div class="input-row"><label>Rounds</label><input type="number" id="in-rounds" class="num-in" value="12"></div>
+                <div class="input-row"><label>Rounds</label><input type="number" id="in-rounds" class="num-in"></div>
             </div>
 
             <div class="set-grp">
                 <div class="set-lbl">Intervals (Seconds)</div>
-                <div class="input-row"><label>Warmup</label><input type="number" id="in-warm" class="num-in" value="240"></div>
-                <div class="input-row"><label>Work</label><input type="number" id="in-work" class="num-in" value="40"></div>
-                <div class="input-row"><label>Rest</label><input type="number" id="in-rest" class="num-in" value="20"></div>
-                <div class="input-row"><label>Cool</label><input type="number" id="in-cool" class="num-in" value="120"></div>
+                <div class="input-row"><label>Warmup</label><input type="number" id="in-warm" class="num-in"></div>
+                <div class="input-row"><label>Work</label><input type="number" id="in-work" class="num-in"></div>
+                <div class="input-row"><label>Rest</label><input type="number" id="in-rest" class="num-in"></div>
+                <div class="input-row"><label>Cool</label><input type="number" id="in-cool" class="num-in"></div>
             </div>
 
             <div class="set-grp">
-                <div class="set-lbl">Input Source</div>
+                <div class="set-lbl">Session Focus</div>
                 <div class="seg-row">
-                    <div class="seg-btn active" onclick="setOpt('cam', true, this)">Camera</div>
-                    <div class="seg-btn" onclick="setOpt('cam', false, this)">No Cam</div>
+                    <div class="seg-btn" id="btn-f-hiit" onclick="setConfigUI('focus', 'HIIT')">HIIT</div>
+                    <div class="seg-btn" id="btn-f-str" onclick="setConfigUI('focus', 'Strength')">Strength</div>
+                    <div class="seg-btn" id="btn-f-rec" onclick="setConfigUI('focus', 'Recovery')">Recover</div>
                 </div>
             </div>
 
             <div class="set-grp">
                 <div class="set-lbl">Video Quality</div>
                 <div class="seg-row">
-                    <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
-                    <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
-                    <div class="seg-btn active" onclick="setOpt('qual', 'high', this)">High</div>
+                    <div class="seg-btn" id="btn-q-low" onclick="setConfigUI('qual', 'low')">Low</div>
+                    <div class="seg-btn" id="btn-q-mid" onclick="setConfigUI('qual', 'mid')">Mid</div>
+                    <div class="seg-btn" id="btn-q-high" onclick="setConfigUI('qual', 'high')">High</div>
                 </div>
             </div>
 
             <div class="set-grp">
-                <div class="set-lbl">Mode</div>
+                <div class="set-lbl">Input Source</div>
                 <div class="seg-row">
-                    <div class="seg-btn active" onclick="setOpt('mode', 'fresh', this)">Fresh</div>
-                    <div class="seg-btn" onclick="setOpt('mode', 'sore', this)">Sore</div>
+                    <div class="seg-btn" id="btn-cam-on" onclick="setConfigUI('cam', true)">Camera</div>
+                    <div class="seg-btn" id="btn-cam-off" onclick="setConfigUI('cam', false)">No Cam</div>
                 </div>
             </div>
 
-            <button class="save-btn" onclick="closeModal('modal-settings')">SAVE CONFIG</button>
+            <button class="save-btn" onclick="saveConfig()">SAVE CONFIG</button>
         </div>
     </div>
 
     <div id="modal-library" class="modal">
         <div class="modal-card">
             <h2 style="margin:0;">Exercise Library</h2>
-            <p style="color:#666; font-size:0.85rem; margin-top:5px;">Select an exercise to view analysis.</p>
+            <input type="text" id="search-bar" placeholder="Search..." onkeyup="filterLib()">
             
-            <input type="text" id="search-bar" placeholder="Search exercises..." onkeyup="filterExercises()">
-            
-            <div id="library-grid" class="db-grid">
-                <div style="grid-column: span 2; color: #444; text-align: center; padding: 20px;">Loading Database...</div>
+            <div class="cat-scroll">
+                <div class="cat-chip active" onclick="filterCat('All', this)">All</div>
+                <div class="cat-chip" onclick="filterCat('HIIT', this)">HIIT</div>
+                <div class="cat-chip" onclick="filterCat('Strength', this)">Strength</div>
+                <div class="cat-chip" onclick="filterCat('Core', this)">Core</div>
+                <div class="cat-chip" onclick="filterCat('Recovery', this)">Recovery</div>
+                <div class="cat-chip" onclick="filterCat('Warmup', this)">Warmup</div>
             </div>
 
+            <div id="library-grid" class="db-grid">Loading...</div>
             <button class="save-btn" style="margin-top:20px;" onclick="closeModal('modal-library')">CLOSE MENU</button>
         </div>
     </div>
@@ -248,8 +249,7 @@
     <div id="modal-ex-detail" class="modal" style="z-index: 110;">
         <div class="modal-card">
             <h2 id="ex-title" style="margin:0; color:#fff; border-bottom:1px solid #333; padding-bottom:10px;">Exercise Name</h2>
-            <div id="ex-content" style="margin-top:20px;">
-                </div>
+            <div id="ex-content" style="margin-top:20px;"></div>
             <button class="save-btn" onclick="closeModal('modal-ex-detail')">BACK</button>
         </div>
     </div>
@@ -259,14 +259,11 @@
             <video id="webcam" autoplay playsinline muted></video>
             <div id="placeholder">NO SIGNAL</div>
         </div>
-
         <div id="controls">
             <div class="header">
                 <div class="title-group">
                     <div class="title">NEURAL FLOW</div>
-                    <button class="streak-btn" onclick="openHistory()">
-                        <span>🔥</span> <span id="streak-disp">0</span>
-                    </button>
+                    <button class="streak-btn" onclick="openHistory()"><span>🔥</span> <span id="streak-disp">0</span></button>
                 </div>
                 <div class="head-btns">
                     <button class="icon-btn" onclick="openModal('modal-settings')">⚙️</button>
@@ -277,7 +274,7 @@
             <div id="scr-home" class="screen active">
                 <button class="big-btn" onclick="startSystem()">
                     <div>INITIALIZE</div>
-                    <div class="sub-txt">SYSTEM READY</div>
+                    <div class="sub-txt" id="sys-ready-txt">HIIT MODE READY</div>
                 </button>
             </div>
 
@@ -297,54 +294,110 @@
     </div>
 
     <script>
-        // === 1. DATA ENGINE ===
-        const db = {
-            get: () => {
-                const s = localStorage.getItem('nf19_data');
-                return s ? JSON.parse(s) : { streak: 0, logs: {} };
-            },
-            save: (d) => localStorage.setItem('nf19_data', JSON.stringify(d)),
-            log: (dur, mode) => {
-                let d = db.get();
-                const date = new Date().toISOString().split('T')[0];
-                if (dur > 300) { 
-                    if (!d.logs[date]) d.streak++;
-                    d.logs[date] = { date: date, dur: dur, mode: mode };
-                    db.save(d);
-                    updateStreak(d.streak);
-                }
-            }
+        // === 1. CONFIG & DATA ===
+        let userConfig = {
+            rounds: 12,
+            warm: 240, work: 40, rest: 20, cool: 120,
+            cam: true, qual: 'high', focus: 'HIIT' // Focus: HIIT, Strength, Recovery
         };
 
-        // === 2. UI UTILS ===
-        let config = { cam: true, qual: 'high', mode: 'fresh' };
-        
-        function updateStreak(s) { document.getElementById('streak-disp').innerText = s; }
-        updateStreak(db.get().streak);
+        const db = {
+            getLogs: () => {
+                const s = localStorage.getItem('nf21_logs');
+                return s ? JSON.parse(s) : { streak: 0, logs: {} };
+            },
+            saveLogs: (d) => localStorage.setItem('nf21_logs', JSON.stringify(d)),
+            getConfig: () => {
+                const s = localStorage.getItem('nf21_cfg');
+                if(s) userConfig = { ...userConfig, ...JSON.parse(s) };
+                return userConfig;
+            },
+            saveConfig: () => localStorage.setItem('nf21_cfg', JSON.stringify(userConfig))
+        };
 
+        // Initialize
+        window.onload = () => {
+            db.getConfig();
+            updateStreak(db.getLogs().streak);
+            applyConfigToUI();
+            document.getElementById('sys-ready-txt').innerText = userConfig.focus.toUpperCase() + " MODE READY";
+        };
+
+        function updateStreak(s) { document.getElementById('streak-disp').innerText = s; }
+
+        // === 2. UI HANDLERS ===
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
-        function setOpt(key, val, el) {
-            config[key] = val;
-            for(let c of el.parentElement.children) c.classList.remove('active');
-            el.classList.add('active');
+        function applyConfigToUI() {
+            document.getElementById('in-rounds').value = userConfig.rounds;
+            document.getElementById('in-warm').value = userConfig.warm;
+            document.getElementById('in-work').value = userConfig.work;
+            document.getElementById('in-rest').value = userConfig.rest;
+            document.getElementById('in-cool').value = userConfig.cool;
+            
+            // Toggles
+            setBtnState('btn-cam-on', 'btn-cam-off', userConfig.cam);
+            
+            toggleGroup('btn-q-', userConfig.qual);
+            toggleGroup('btn-f-', getFocusShort(userConfig.focus));
+        }
+
+        function getFocusShort(f) {
+            if(f==='Strength') return 'str';
+            if(f==='Recovery') return 'rec';
+            return 'hiit';
+        }
+
+        function toggleGroup(prefix, activeVal) {
+            // Simplified toggle logic assuming IDs match values roughly or passed directly
+            // For V21 specific mappings:
+            if(prefix === 'btn-q-') {
+                document.getElementById('btn-q-low').classList.toggle('active', activeVal==='low');
+                document.getElementById('btn-q-mid').classList.toggle('active', activeVal==='mid');
+                document.getElementById('btn-q-high').classList.toggle('active', activeVal==='high');
+            }
+            if(prefix === 'btn-f-') {
+                document.getElementById('btn-f-hiit').classList.toggle('active', activeVal==='hiit');
+                document.getElementById('btn-f-str').classList.toggle('active', activeVal==='str');
+                document.getElementById('btn-f-rec').classList.toggle('active', activeVal==='rec');
+            }
+        }
+
+        function setBtnState(id1, id2, condition) {
+            document.getElementById(id1).classList.toggle('active', condition);
+            document.getElementById(id2).classList.toggle('active', !condition);
+        }
+
+        function setConfigUI(key, val) {
+            userConfig[key] = val;
+            applyConfigToUI(); 
+        }
+
+        function saveConfig() {
+            userConfig.rounds = parseInt(document.getElementById('in-rounds').value);
+            userConfig.warm = parseInt(document.getElementById('in-warm').value);
+            userConfig.work = parseInt(document.getElementById('in-work').value);
+            userConfig.rest = parseInt(document.getElementById('in-rest').value);
+            userConfig.cool = parseInt(document.getElementById('in-cool').value);
+            db.saveConfig();
+            document.getElementById('sys-ready-txt').innerText = userConfig.focus.toUpperCase() + " MODE READY";
+            closeModal('modal-settings');
         }
 
         // === 3. EXERCISE LIBRARY ENGINE ===
-        let exerciseDB = []; // Will hold JSON data
+        let exerciseDB = [];
+        let currentCatFilter = 'All';
 
-        async function loadExerciseData() {
+        async function loadDB() {
+            if(exerciseDB.length > 0) return;
             try {
-                const response = await fetch('details.json');
-                if (!response.ok) throw new Error("JSON not found");
-                exerciseDB = await response.json();
-                renderLibrary(exerciseDB);
-            } catch (e) {
-                document.getElementById('library-grid').innerHTML = 
-                    `<div style="grid-column:span 2; color:#666; text-align:center;">
-                        Database file (details.json) missing.<br>Please create it.
-                     </div>`;
+                const res = await fetch('details.json');
+                if(!res.ok) throw new Error();
+                exerciseDB = await res.json();
+                filterLib(); // Render initial list
+            } catch(e) {
+                document.getElementById('library-grid').innerHTML = "details.json not found.";
             }
         }
 
@@ -360,38 +413,194 @@
             });
         }
 
-        function filterExercises() {
-            const query = document.getElementById('search-bar').value.toLowerCase();
-            const filtered = exerciseDB.filter(ex => ex.name.toLowerCase().includes(query));
-            renderLibrary(filtered);
+        function filterCat(cat, el) {
+            currentCatFilter = cat;
+            // Update UI chips
+            let chips = document.querySelectorAll('.cat-chip');
+            chips.forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            filterLib();
         }
 
-        function openLibrary() {
-            openModal('modal-library');
-            if(exerciseDB.length === 0) loadExerciseData();
+        function filterLib() {
+            const q = document.getElementById('search-bar').value.toLowerCase();
+            let list = exerciseDB.filter(ex => ex.name.toLowerCase().includes(q));
+            
+            if (currentCatFilter !== 'All') {
+                list = list.filter(ex => {
+                    const type = (ex.type || "").toLowerCase();
+                    const use = (ex.best_use || "").toLowerCase();
+                    const cat = currentCatFilter.toLowerCase();
+                    return type.includes(cat) || use.includes(cat);
+                });
+            }
+            renderLibrary(list);
         }
+
+        function openLibrary() { openModal('modal-library'); loadDB(); }
 
         function showExerciseDetail(ex) {
             document.getElementById('ex-title').innerText = ex.name;
-            const content = document.getElementById('ex-content');
-            content.innerHTML = `
+            document.getElementById('ex-content').innerHTML = `
                 <div class="ex-detail-row"><div class="ex-label">Type</div><div class="ex-val">${ex.type}</div></div>
-                <div class="ex-detail-row"><div class="ex-label">Primary Muscles</div><div class="ex-val">${ex.muscles}</div></div>
-                <div class="ex-detail-row"><div class="ex-label">Movement Phases</div><div class="ex-val">${ex.phases}</div></div>
-                <div class="ex-detail-row"><div class="ex-label">Energy System</div><div class="ex-val">${ex.energy}</div></div>
-                <div class="ex-detail-row"><div class="ex-label">Key Benefits</div><div class="ex-val">${ex.benefits}</div></div>
-                <div class="ex-detail-row"><div class="ex-label">Common Mistakes</div><div class="ex-val">${ex.mistakes}</div></div>
-                <div class="ex-detail-row"><div class="ex-label">Regressions / Progressions</div><div class="ex-val">${ex.regress_progress}</div></div>
                 <div class="ex-detail-row"><div class="ex-label">Best Use</div><div class="ex-val">${ex.best_use}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Muscles</div><div class="ex-val">${ex.muscles}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Benefits</div><div class="ex-val">${ex.benefits}</div></div>
+                <div class="ex-detail-row"><div class="ex-label">Form</div><div class="ex-val">${ex.phases}</div></div>
             `;
             openModal('modal-ex-detail');
         }
 
-        // === 4. VISUALIZATION ===
-        function openHistory() {
-            const data = db.get();
-            openModal('modal-history');
+        // === 4. SESSION ENGINE (SMART GENERATOR) ===
+        let session = { phase:0, time:0, interval:null, paused:false, elapsed:0 };
+        let schedule = [];
+        let mediaRecorder, chunks=[], blobUrl;
+        
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance(text);
+                u.rate = 1.2;
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        async function startSystem() {
+            await loadDB(); 
+
+            // Camera Setup
+            if(userConfig.cam) {
+                try {
+                    let w=1280, h=720, br=2500000;
+                    if(userConfig.qual==='low') { w=640; h=480; br=1000000; }
+                    if(userConfig.qual==='high') { w=1920; h=1080; br=5000000; }
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:w}, height:{ideal:h}, facingMode:'user'}});
+                    document.getElementById('webcam').srcObject = stream;
+                    
+                    const opts = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: br };
+                    if(MediaRecorder.isTypeSupported(opts.mimeType)) {
+                        mediaRecorder = new MediaRecorder(stream, opts);
+                        mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+                        mediaRecorder.onstop = () => {
+                            blobUrl = URL.createObjectURL(new Blob(chunks, {type:'video/webm'}));
+                            document.getElementById('btn-dl').style.display = 'block';
+                        };
+                        mediaRecorder.start();
+                    }
+                } catch(e) {
+                    alert("Cam Blocked"); userConfig.cam = false;
+                }
+            }
+            if(!userConfig.cam) {
+                document.getElementById('webcam').style.display='none';
+                document.getElementById('placeholder').style.display='flex';
+            }
+
+            // SMART BUILD SCHEDULE
+            schedule = [{d:userConfig.warm, l:"WARM UP"}];
             
+            // Filter Pool based on Focus
+            let pool = exerciseDB;
+            const focus = userConfig.focus.toLowerCase();
+            
+            if (exerciseDB.length > 0) {
+                if (focus === 'recovery') {
+                    pool = exerciseDB.filter(e => e.type.toLowerCase().includes('mobility') || e.type.toLowerCase().includes('stretch') || e.best_use.toLowerCase().includes('cooldown'));
+                } else if (focus === 'strength') {
+                    pool = exerciseDB.filter(e => e.type.toLowerCase().includes('strength') || e.type.toLowerCase().includes('core'));
+                } else {
+                    // HIIT (Default)
+                    pool = exerciseDB.filter(e => e.type.toLowerCase().includes('hiit') || e.type.toLowerCase().includes('plyo') || e.type.toLowerCase().includes('cardio'));
+                }
+            }
+            
+            if(pool.length === 0) pool = exerciseDB; // Fallback
+            if(pool.length > 0) pool = shuffle(pool);
+
+            for(let i=1; i<=userConfig.rounds; i++) {
+                let name = pool.length > 0 ? pool[(i-1) % pool.length].name.toUpperCase() : `ROUND ${i}`;
+                schedule.push({d:userConfig.work, l:name});
+                schedule.push({d:userConfig.rest, l:"REST"});
+            }
+            schedule.push({d:userConfig.cool, l:"COOLDOWN"});
+            schedule.push({d:120, l:"VISUALIZE"});
+
+            document.getElementById('scr-home').classList.remove('active');
+            document.getElementById('scr-hud').classList.add('active');
+            session.elapsed = 0;
+            speak(userConfig.focus + " Session Initialized. Starting Warmup.");
+            runPhase();
+        }
+
+        function runPhase() {
+            if(session.phase >= schedule.length) { finishSession(); return; }
+            let p = schedule[session.phase];
+            session.time = p.d;
+            document.getElementById('phase-lbl').innerText = p.l;
+            
+            if(p.l !== "REST" && p.l !== "WARM UP" && p.l !== "COOLDOWN") speak(p.l);
+
+            clearInterval(session.interval);
+            session.interval = setInterval(() => {
+                if(!session.paused) {
+                    session.time--;
+                    session.elapsed++;
+                    let m = Math.floor(session.time/60);
+                    let s = session.time%60;
+                    document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
+                    
+                    if(session.time <= 3 && session.time > 0) speak(String(session.time));
+                    if(session.time<=0) { session.phase++; runPhase(); }
+                }
+            }, 1000);
+        }
+
+        function togglePause() {
+            session.paused = !session.paused;
+            document.getElementById('btn-pause').innerText = session.paused ? "RESUME" : "PAUSE";
+            if(mediaRecorder) session.paused ? mediaRecorder.pause() : mediaRecorder.resume();
+        }
+
+        function finishSession() {
+            clearInterval(session.interval);
+            if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
+            
+            let d = db.getLogs();
+            const date = new Date().toISOString().split('T')[0];
+            if (session.elapsed > 300) { 
+                if (!d.logs[date]) d.streak++;
+                d.logs[date] = { date: date, dur: session.elapsed, mode: userConfig.focus };
+                db.saveLogs(d);
+                updateStreak(d.streak);
+            }
+
+            document.getElementById('phase-lbl').innerText = "COMPLETE";
+            document.getElementById('timer').innerText = "DONE";
+            document.getElementById('active-ctrls').style.display = 'none';
+            document.getElementById('finish-ctrls').style.display = 'grid';
+            speak("Session Complete.");
+        }
+
+        function saveVideo() {
+            let a = document.createElement('a');
+            a.style.display = 'none'; 
+            const now = new Date();
+            const filename = `HIIT-${now.getDate()}${now.getMonth()+1}${now.getFullYear()}-${now.getHours()}${now.getMinutes()}.webm`;
+            a.href = blobUrl; a.download = filename;
+            document.body.appendChild(a); a.click();
+        }
+
+        function openHistory() {
+            const data = db.getLogs();
+            openModal('modal-history');
             const grid = document.getElementById('cal-grid');
             grid.innerHTML = '';
             for (let i = 13; i >= 0; i--) {
@@ -400,10 +609,18 @@
                 const node = document.createElement('div');
                 node.className = data.logs[iso] ? 'day-node active' : 'day-node';
                 node.innerText = d.getDate();
-                if(data.logs[iso]) node.onclick = () => showDetails(data.logs[iso]);
+                if(data.logs[iso]) node.onclick = () => {
+                    document.getElementById('day-details').style.display = 'block';
+                    document.getElementById('d-date').innerText = data.logs[iso].date;
+                    document.getElementById('d-dur').innerText = Math.floor(data.logs[iso].dur/60) + "m";
+                    document.getElementById('d-mode').innerText = data.logs[iso].mode || "HIIT";
+                };
                 grid.appendChild(node);
             }
+            renderGraph(data);
+        }
 
+        function renderGraph(data) {
             const canvas = document.getElementById('progressGraph');
             const ctx = canvas.getContext('2d');
             const rect = canvas.parentElement.getBoundingClientRect();
@@ -427,139 +644,6 @@
                 ctx.fillStyle=v>0?'#fff':'#333'; ctx.fillRect(x-2,y-2,4,4);
             });
             ctx.stroke();
-        }
-
-        function showDetails(log) {
-            document.getElementById('day-details').style.display = 'block';
-            document.getElementById('d-date').innerText = log.date;
-            document.getElementById('d-mode').innerText = log.mode.toUpperCase();
-            document.getElementById('d-dur').innerText = Math.floor(log.dur/60) + "m " + (log.dur%60)+"s";
-        }
-
-        // === 5. SESSION ENGINE ===
-        let session = { phase:0, time:0, interval:null, paused:false, elapsed:0 };
-        let schedule = [];
-        let mediaRecorder, chunks=[], blobUrl;
-        
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance(text);
-                u.rate = 1.2;
-                window.speechSynthesis.speak(u);
-            }
-        }
-
-        async function startSystem() {
-            if(config.cam) {
-                try {
-                    let w=1280, h=720, bitrate=2500000;
-                    if(config.qual==='low') { w=640; h=480; bitrate=1000000; }
-                    if(config.qual==='high') { w=1920; h=1080; bitrate=5000000; }
-                    
-                    const stream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:w}, height:{ideal:h}, facingMode:'user'}});
-                    document.getElementById('webcam').srcObject = stream;
-                    
-                    const options = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: bitrate };
-                    if(MediaRecorder.isTypeSupported(options.mimeType)) {
-                        mediaRecorder = new MediaRecorder(stream, options);
-                        mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
-                        mediaRecorder.onstop = () => {
-                            blobUrl = URL.createObjectURL(new Blob(chunks, {type:'video/webm'}));
-                            document.getElementById('btn-dl').style.display = 'block';
-                        };
-                        mediaRecorder.start();
-                    }
-                } catch(e) {
-                    alert("Cam Blocked. No-Cam Mode Active."); config.cam = false;
-                }
-            }
-            if(!config.cam) {
-                document.getElementById('webcam').style.display='none';
-                document.getElementById('placeholder').style.display='flex';
-            }
-
-            const t = {
-                rounds: parseInt(document.getElementById('in-rounds').value)||12,
-                warm: parseInt(document.getElementById('in-warm').value)||240,
-                work: parseInt(document.getElementById('in-work').value)||40,
-                rest: parseInt(document.getElementById('in-rest').value)||20,
-                cool: parseInt(document.getElementById('in-cool').value)||120
-            };
-            
-            schedule = [{d:t.warm, l:"WARM UP"}];
-            for(let i=1; i<=t.rounds; i++) {
-                schedule.push({d:t.work, l:`R${i} WORK`});
-                schedule.push({d:t.rest, l:`R${i} REST`});
-            }
-            schedule.push({d:t.cool, l:"COOLDOWN"});
-            schedule.push({d:120, l:"VISUALIZE"});
-
-            document.getElementById('scr-home').classList.remove('active');
-            document.getElementById('scr-hud').classList.add('active');
-            session.elapsed = 0;
-            speak("System initialized. Starting Warmup.");
-            runPhase();
-        }
-
-        function runPhase() {
-            if(session.phase >= schedule.length) { finishSession(); return; }
-            let p = schedule[session.phase];
-            session.time = p.d;
-            document.getElementById('phase-lbl').innerText = p.l;
-
-            clearInterval(session.interval);
-            session.interval = setInterval(() => {
-                if(!session.paused) {
-                    session.time--;
-                    session.elapsed++;
-                    let m = Math.floor(session.time/60);
-                    let s = session.time%60;
-                    document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
-                    
-                    if(session.time === 3) speak("Three");
-                    if(session.time === 2) speak("Two");
-                    if(session.time === 1) speak("One");
-
-                    if(session.time<=0) { session.phase++; runPhase(); }
-                }
-            }, 1000);
-        }
-
-        function togglePause() {
-            session.paused = !session.paused;
-            let btn = document.getElementById('btn-pause');
-            if(session.paused) {
-                if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.pause();
-                btn.innerText = "RESUME";
-            } else {
-                if(mediaRecorder && mediaRecorder.state==='paused') mediaRecorder.resume();
-                btn.innerText = "PAUSE";
-            }
-        }
-
-        function finishSession() {
-            clearInterval(session.interval);
-            if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
-            db.log(session.elapsed, config.mode);
-            
-            document.getElementById('phase-lbl').innerText = "COMPLETE";
-            document.getElementById('timer').innerText = "DONE";
-            document.getElementById('active-ctrls').style.display = 'none';
-            document.getElementById('finish-ctrls').style.display = 'grid';
-            speak("Session Complete.");
-        }
-
-        function saveVideo() {
-            let a = document.createElement('a');
-            a.style.display = 'none'; 
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const time = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
-            const filename = `HIIT-${day}${month}${year}-${time}.webm`;
-            a.href = blobUrl; a.download = filename;
-            document.body.appendChild(a); a.click();
         }
     </script>
 </body>
