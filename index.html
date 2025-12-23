@@ -2,362 +2,935 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V14</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Timer - Streak Calendar</title>
     <style>
-        /* === TITANIUM STEALTH THEME === */
-        :root {
-            --bg: #000000;
-            --surface: #0a0a0a;
-            --border: #222;
-            --text-main: #ffffff;
-            --text-dim: #666;
-            --accent: #ffffff;
-            --action: #007AFF;
-            --danger: #FF3B30;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+
         body {
-            margin: 0; background: var(--bg); color: var(--text-main);
-            font-family: 'Inter', sans-serif; height: 100vh; width: 100vw;
-            overflow: hidden; display: flex; opacity: 0; animation: fadeIn 0.5s ease forwards;
-        }
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        /* === MAIN LAYOUT === */
-        #app { display: flex; width: 100%; height: 100%; }
-
-        /* LEFT: MONITOR */
-        #monitor {
-            flex: 1; position: relative; background: #050505;
-            border-right: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; }
-        #placeholder { 
-            width: 200px; height: 200px; border: 2px solid #333; border-radius: 50%; 
-            display: none; align-items: center; justify-content: center; 
-            font-size: 0.8rem; letter-spacing: 2px; color: #444; font-weight: 700;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        /* RIGHT: CONTROLS */
-        #controls {
-            flex: 1; max-width: 500px; background: var(--surface);
-            display: flex; flex-direction: column; position: relative;
+        .container {
+            width: 100%;
+            max-width: 1200px;
         }
 
-        /* HEADER */
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            color: white;
+        }
+
         .header {
-            height: 70px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 30px; border-bottom: 1px solid var(--border);
+            text-align: center;
+            margin-bottom: 40px;
         }
-        .title { font-weight: 900; letter-spacing: -0.5px; font-size: 1.1rem; }
-        .head-btns { display: flex; gap: 10px; }
-        .icon-btn {
-            width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
-            background: transparent; color: #fff; cursor: pointer; display: flex; 
-            align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;
-        }
-        .icon-btn:hover { background: #111; }
 
-        /* SCREENS */
-        .screen {
-            flex: 1; display: none; flex-direction: column; 
-            align-items: center; justify-content: center; padding: 40px;
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        .screen.active { display: flex; }
 
-        /* HOME SCREEN */
-        #home-screen { text-align: center; }
-        .big-btn {
-            width: 260px; height: 260px; border-radius: 50%; border: 4px solid #333;
-            background: transparent; color: #fff; font-size: 1.2rem; font-weight: 800;
-            cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; gap: 10px;
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
         }
-        .big-btn:hover { border-color: #fff; box-shadow: 0 0 80px rgba(255,255,255,0.1); }
-        .big-btn:active { transform: scale(0.95); }
-        .sub-txt { font-size: 0.8rem; color: #666; font-weight: 500; text-transform: uppercase; }
 
-        /* HUD SCREEN */
-        #timer { font-size: 6rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 50px; }
-        
-        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 400px; }
-        .act-btn {
-            padding: 25px; border-radius: 14px; border: 1px solid var(--border);
-            background: #111; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
+        /* Stats Section */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
-        .act-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
-        .act-btn:active { transform: scale(0.98); }
 
-        /* MODALS */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            font-size: 0.95em;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Calendar Grid */
+        .calendar-container {
+            margin-bottom: 40px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .calendar-header h2 {
+            font-size: 1.8em;
+        }
+
+        .calendar-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .calendar-month {
+            font-size: 1.1em;
+            font-weight: bold;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        /* Day Names */
+        .day-names {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .day-name {
+            text-align: center;
+            font-weight: bold;
+            opacity: 0.7;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        /* Calendar Days */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            position: relative;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .day:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.08);
+        }
+
+        .day.empty {
+            cursor: default;
+            background: transparent;
+            border: none;
+        }
+
+        .day.empty:hover {
+            background: transparent;
+            transform: none;
+        }
+
+        .day.no-workout {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .day.workout {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+            border: none;
+        }
+
+        .day.rest-day {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+        }
+
+        .day.streak {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+            border: none;
+        }
+
+        .day-number {
+            font-size: 0.95em;
+        }
+
+        .day.workout::after,
+        .day.streak::after {
+            content: '✓';
+            position: absolute;
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        /* Progress Graph */
+        .progress-section {
+            margin-bottom: 40px;
+        }
+
+        .progress-header {
+            margin-bottom: 25px;
+        }
+
+        .progress-header h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .progress-graph {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .graph-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            gap: 8px;
+        }
+
+        .bar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar {
+            width: 100%;
+            background: linear-gradient(180deg, #00d4ff 0%, #0099ff 100%);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            min-height: 5px;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .bar:hover {
+            filter: brightness(1.2);
+        }
+
+        .bar-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .bar-value {
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Workout History */
+        .history-section {
+            margin-bottom: 40px;
+        }
+
+        .history-header {
+            margin-bottom: 20px;
+        }
+
+        .history-header h3 {
+            font-size: 1.5em;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .history-date {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .history-time {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .history-details {
+            text-align: right;
+        }
+
+        .workout-duration {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .workout-type {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* Modal Styles */
         .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 100; display: none;
-            backdrop-filter: blur(15px); align-items: center; justify-content: center;
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
         }
-        .modal-card {
-            background: #0a0a0a; width: 90%; max-width: 500px; max-height: 85vh;
-            border: 1px solid var(--border); border-radius: 20px; padding: 30px;
-            overflow-y: auto; box-shadow: 0 50px 100px #000;
+
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        
-        /* SETTINGS UI */
-        .set-grp { margin-bottom: 25px; }
-        .set-lbl { font-size: 0.75rem; text-transform: uppercase; color: #666; font-weight: 700; margin-bottom: 10px; }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #1a1a1a; padding-bottom: 12px; }
-        .input-row label { font-size: 0.95rem; }
-        .num-in { background: #111; border: 1px solid #333; color: #fff; width: 70px; padding: 8px; text-align: center; border-radius: 6px; }
 
-        .seg-row { display: flex; background: #111; padding: 4px; border-radius: 10px; }
-        .seg-btn { flex: 1; padding: 10px; text-align: center; font-size: 0.9rem; color: #666; cursor: pointer; border-radius: 8px; font-weight: 600; }
-        .seg-btn.active { background: #333; color: #fff; }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
 
-        .save-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 20px; }
+        .modal-content {
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
 
-        /* Mobile */
-        @media (max-width: 900px) {
-            #app { flex-direction: column; }
-            #monitor { height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
-            #controls { height: 60vh; max-width: 100%; }
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8em;
+            color: white;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            color: white;
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-label {
+            font-size: 0.95em;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .detail-content {
+            margin-top: 10px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        /* Scrollbar Styling */
+        .history-list::-webkit-scrollbar,
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .history-list::-webkit-scrollbar-track,
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb,
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb:hover,
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+
+            .day {
+                font-size: 0.9em;
+            }
+
+            .graph-bars {
+                height: 150px;
+            }
+
+            .calendar-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .calendar-month {
+                min-width: 100%;
+            }
+
+            .calendar-controls {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.6em;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 2em;
+            }
+
+            .calendar-header h2 {
+                font-size: 1.4em;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.4em;
+            }
         }
     </style>
 </head>
 <body>
-
-    <div id="modal-settings" class="modal">
-        <div class="modal-card">
-            <h2 style="margin-top:0;">Session Configuration</h2>
-            
-            <div class="set-grp">
-                <div class="set-lbl">Timers (Seconds)</div>
-                <div class="input-row"><label>Warmup</label><input type="number" id="in-warm" class="num-in" value="240"></div>
-                <div class="input-row"><label>Work Phase</label><input type="number" id="in-work" class="num-in" value="40"></div>
-                <div class="input-row"><label>Rest Phase</label><input type="number" id="in-rest" class="num-in" value="20"></div>
-                <div class="input-row"><label>Cooldown</label><input type="number" id="in-cool" class="num-in" value="120"></div>
-                <div class="input-row"><label>Visualization</label><input type="number" id="in-vis" class="num-in" value="120"></div>
-            </div>
-
-            <div class="set-grp">
-                <div class="set-lbl">Input Source</div>
-                <div class="seg-row">
-                    <div class="seg-btn active" onclick="setOpt('cam', true, this)">Camera</div>
-                    <div class="seg-btn" onclick="setOpt('cam', false, this)">No Cam</div>
-                </div>
-            </div>
-
-            <div class="set-grp">
-                <div class="set-lbl">Recording Quality</div>
-                <div class="seg-row">
-                    <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
-                    <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
-                    <div class="seg-btn active" onclick="setOpt('qual', 'high', this)">High</div>
-                </div>
-            </div>
-
-            <div class="set-grp">
-                <div class="set-lbl">Physiology</div>
-                <div class="seg-row">
-                    <div class="seg-btn active" onclick="setOpt('mode', 'fresh', this)">Fresh</div>
-                    <div class="seg-btn" onclick="setOpt('mode', 'sore', this)">Sore</div>
-                </div>
-            </div>
-
-            <button class="save-btn" onclick="closeModal('modal-settings')">SAVE & CLOSE</button>
-        </div>
-    </div>
-
-    <div id="modal-info" class="modal">
-        <div class="modal-card">
-            <h2 style="margin-top:0;">Protocol Manual</h2>
-            <p style="color:#aaa; line-height:1.6;">Designed for high-performance neurogenesis. Use HIIT to trigger BDNF production.</p>
-            <div style="background:rgba(255,59,48,0.1); color:#ff3b30; padding:15px; border-radius:10px; font-weight:700; font-size:0.9rem;">
-                ⚠ WARNING: Streak data is stored in browser cache. Clearing history will wipe your streak.
-            </div>
-            <button class="save-btn" onclick="closeModal('modal-info')">ACKNOWLEDGE</button>
-        </div>
-    </div>
-
-    <div id="app">
-        
-        <div id="monitor">
-            <video id="webcam" autoplay playsinline muted></video>
-            <div id="placeholder">NO SIGNAL</div>
-        </div>
-
-        <div id="controls">
+    <div class="container">
+        <div class="glass-card">
+            <!-- Header -->
             <div class="header">
-                <div class="title">NEURAL FLOW v14</div>
-                <div class="head-btns">
-                    <button class="icon-btn" onclick="openModal('modal-settings')">⚙️</button>
-                    <button class="icon-btn" onclick="openModal('modal-info')">?</button>
+                <h1>🏋️ Workout Tracker</h1>
+                <p>Track your daily progress and maintain your streak</p>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-label">Current Streak</div>
+                    <div class="stat-value" id="currentStreak">0</div>
+                    <div class="stat-label">days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Longest Streak</div>
+                    <div class="stat-value" id="longestStreak">0</div>
+                    <div class="stat-label">days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Workouts</div>
+                    <div class="stat-value" id="totalWorkouts">0</div>
+                    <div class="stat-label">completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">This Month</div>
+                    <div class="stat-value" id="thisMonth">0</div>
+                    <div class="stat-label">workouts</div>
                 </div>
             </div>
 
-            <div id="scr-home" class="screen active">
-                <button class="big-btn" onclick="startSystem()">
-                    <div>INITIALIZE</div>
-                    <div class="sub-txt">SYSTEM READY</div>
-                </button>
-            </div>
-
-            <div id="scr-hud" class="screen">
-                <div id="timer">00:00</div>
-                <div id="phase-lbl">READY</div>
-                
-                <div class="hud-grid" id="active-ctrls">
-                    <button class="act-btn" id="btn-pause" onclick="togglePause()">PAUSE</button>
-                    <button class="act-btn finish" onclick="finishSession()">FINISH</button>
+            <!-- Calendar Section -->
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <div class="calendar-controls">
+                        <button class="btn" id="prevMonth">← Previous</button>
+                    </div>
+                    <div class="calendar-month" id="monthYear"></div>
+                    <div class="calendar-controls">
+                        <button class="btn" id="nextMonth">Next →</button>
+                    </div>
                 </div>
 
-                <div class="hud-grid" id="finish-ctrls" style="display:none;">
-                    <button class="act-btn" id="btn-dl" style="background:#007aff; display:none;" onclick="saveVideo()">SAVE</button>
-                    <button class="act-btn" onclick="location.reload()">HOME</button>
+                <div class="day-names">
+                    <div class="day-name">Sun</div>
+                    <div class="day-name">Mon</div>
+                    <div class="day-name">Tue</div>
+                    <div class="day-name">Wed</div>
+                    <div class="day-name">Thu</div>
+                    <div class="day-name">Fri</div>
+                    <div class="day-name">Sat</div>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <!-- Progress Graph Section -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <h3>📊 Weekly Progress</h3>
+                </div>
+                <div class="progress-graph">
+                    <div class="graph-bars" id="graphBars"></div>
                 </div>
             </div>
+
+            <!-- Workout History Section -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📋 Recent Workouts</h3>
+                </div>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalDate"></h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
         </div>
     </div>
 
     <script>
-        // === STATE ===
-        let config = { cam: true, qual: 'high', mode: 'fresh' };
-        let session = { phase: 0, time: 0, interval: null, paused: false };
-        let schedule = [];
-        let mediaRecorder, chunks = [], blobUrl;
+        // Sample workout data structure
+        const workoutData = {
+            '2025-12-23': { duration: 45, type: 'Strength', calories: 350, exercises: ['Squats', 'Bench Press', 'Deadlifts'] },
+            '2025-12-22': { duration: 30, type: 'Cardio', calories: 280, exercises: ['Running', 'Jump Rope'] },
+            '2025-12-21': { duration: 50, type: 'Full Body', calories: 420, exercises: ['Circuit Training'] },
+            '2025-12-20': { duration: 35, type: 'Yoga', calories: 150, exercises: ['Stretching', 'Poses'] },
+            '2025-12-19': { duration: 45, type: 'Strength', calories: 380, exercises: ['Squats', 'Leg Press'] },
+            '2025-12-18': { duration: 0, type: 'Rest Day', calories: 0, exercises: [] },
+            '2025-12-17': { duration: 40, type: 'Cardio', calories: 320, exercises: ['Cycling', 'Sprints'] },
+            '2025-12-16': { duration: 45, type: 'Strength', calories: 360, exercises: ['Push-ups', 'Pull-ups', 'Rows'] },
+            '2025-12-15': { duration: 30, type: 'Flexibility', calories: 120, exercises: ['Yoga', 'Stretching'] },
+            '2025-12-14': { duration: 50, type: 'Full Body', calories: 410, exercises: ['CrossFit WOD'] },
+            '2025-12-13': { duration: 35, type: 'Cardio', calories: 290, exercises: ['Treadmill', 'Stair Climber'] },
+            '2025-12-12': { duration: 0, type: 'Rest Day', calories: 0, exercises: [] },
+        };
 
-        // === UI UTILS ===
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        function setOpt(key, val, el) {
-            config[key] = val;
-            let siblings = el.parentElement.children;
-            for(let btn of siblings) btn.classList.remove('active');
-            el.classList.add('active');
+        let currentDate = new Date(2025, 11, 23);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalendar();
+            updateStats();
+            updateProgressGraph();
+            updateHistory();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                updateCalendar();
+            });
+
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                updateCalendar();
+            });
+
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('detailsModal').addEventListener('click', (e) => {
+                if (e.target.id === 'detailsModal') closeModal();
+            });
         }
 
-        // === START LOGIC ===
-        async function startSystem() {
-            // 1. Setup Camera
-            if(config.cam) {
-                try {
-                    let w=1280, h=720;
-                    if(config.qual==='low') { w=640; h=480; }
-                    if(config.qual==='high') { w=1920; h=1080; }
-                    
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: { width: {ideal:w}, height: {ideal:h}, facingMode: 'user' }, 
-                        audio: false
-                    });
-                    document.getElementById('webcam').srcObject = stream;
-                    
-                    // Recorder
-                    if(MediaRecorder.isTypeSupported('video/webm')) {
-                        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-                        mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
-                        mediaRecorder.onstop = () => {
-                            let b = new Blob(chunks, { type: 'video/webm' });
-                            blobUrl = URL.createObjectURL(b);
-                            document.getElementById('btn-dl').style.display = 'block';
-                        };
-                        mediaRecorder.start();
+        function updateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('monthYear').textContent = 
+                new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // Previous month's days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'day empty';
+                day.textContent = daysInPrevMonth - i;
+                grid.appendChild(day);
+            }
+
+            // Current month's days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = formatDate(new Date(year, month, i));
+                const day = document.createElement('div');
+                const workout = workoutData[dateStr];
+
+                if (workout) {
+                    if (workout.duration === 0) {
+                        day.className = 'day rest-day';
+                    } else {
+                        day.className = 'day workout';
                     }
-                } catch(e) {
-                    alert("Camera blocked. Switching to No-Cam.");
-                    config.cam = false;
+                } else {
+                    day.className = 'day no-workout';
+                }
+
+                day.textContent = i;
+                day.addEventListener('click', () => showDetails(dateStr, workout));
+                grid.appendChild(day);
+            }
+
+            // Next month's days
+            const remainingCells = 42 - (firstDay + daysInMonth);
+            for (let i = 1; i <= remainingCells; i++) {
+                const day = document.createElement('div');
+                day.className = 'day empty';
+                day.textContent = i;
+                grid.appendChild(day);
+            }
+        }
+
+        function updateStats() {
+            let currentStreak = 0;
+            let longestStreak = 0;
+            let tempStreak = 0;
+            let totalWorkouts = 0;
+            let thisMonth = 0;
+
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+
+            // Calculate streaks and stats
+            for (let i = 0; i < 365; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = formatDate(date);
+                const workout = workoutData[dateStr];
+
+                if (workout && workout.duration > 0) {
+                    tempStreak++;
+                    totalWorkouts++;
+                    if (i === 0) currentStreak = tempStreak;
+                    
+                    if (date.getFullYear() === year && date.getMonth() === month) {
+                        thisMonth++;
+                    }
+                } else {
+                    if (tempStreak > longestStreak) longestStreak = tempStreak;
+                    tempStreak = 0;
                 }
             }
 
-            if(!config.cam) {
-                document.getElementById('webcam').style.display = 'none';
-                document.getElementById('placeholder').style.display = 'flex';
+            document.getElementById('currentStreak').textContent = currentStreak;
+            document.getElementById('longestStreak').textContent = Math.max(longestStreak, tempStreak);
+            document.getElementById('totalWorkouts').textContent = totalWorkouts;
+            document.getElementById('thisMonth').textContent = thisMonth;
+        }
+
+        function updateProgressGraph() {
+            const bars = document.getElementById('graphBars');
+            bars.innerHTML = '';
+
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const today = new Date();
+            const weekData = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = formatDate(date);
+                const workout = workoutData[dateStr];
+                weekData.push(workout ? workout.duration : 0);
             }
 
-            // 2. Build Schedule
-            const t = {
-                warm: parseInt(document.getElementById('in-warm').value) || 240,
-                work: parseInt(document.getElementById('in-work').value) || 40,
-                rest: parseInt(document.getElementById('in-rest').value) || 20,
-                cool: parseInt(document.getElementById('in-cool').value) || 120,
-                vis: parseInt(document.getElementById('in-vis').value) || 120
-            };
-            
-            schedule = [{dur:t.warm, lbl:"WARM UP"}];
-            for(let i=1; i<=12; i++) {
-                schedule.push({dur:t.work, lbl:`ROUND ${i} WORK`});
-                schedule.push({dur:t.rest, lbl:`ROUND ${i} REST`});
+            const maxDuration = Math.max(...weekData, 60);
+
+            weekData.forEach((duration, index) => {
+                const container = document.createElement('div');
+                container.className = 'bar-container';
+
+                const value = document.createElement('div');
+                value.className = 'bar-value';
+                value.textContent = duration + 'min';
+
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = ((duration / maxDuration) * 100) + '%';
+
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = days[(new Date(new Date().getTime() - (6 - index) * 24 * 60 * 60 * 1000)).getDay()];
+
+                container.appendChild(value);
+                container.appendChild(bar);
+                container.appendChild(label);
+                bars.appendChild(container);
+            });
+        }
+
+        function updateHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+
+            const sortedDates = Object.keys(workoutData)
+                .filter(date => workoutData[date].duration > 0)
+                .sort()
+                .reverse()
+                .slice(0, 10);
+
+            if (sortedDates.length === 0) {
+                list.innerHTML = '<p style="text-align: center; opacity: 0.7;">No workouts recorded yet</p>';
+                return;
             }
-            schedule.push({dur:t.cool, lbl:"COOLDOWN"});
-            schedule.push({dur:t.vis, lbl:"VISUALIZE"});
 
-            // 3. Switch Screen
-            document.getElementById('scr-home').classList.remove('active');
-            document.getElementById('scr-hud').classList.add('active');
-            
-            // 4. Run
-            runPhase();
+            sortedDates.forEach(dateStr => {
+                const workout = workoutData[dateStr];
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div>
+                        <div class="history-date">${new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                        <div class="history-time">${dateStr}</div>
+                    </div>
+                    <div class="history-details">
+                        <div class="workout-duration">${workout.duration} min</div>
+                        <div class="workout-type">${workout.type}</div>
+                    </div>
+                `;
+                item.addEventListener('click', () => showDetails(dateStr, workout));
+                list.appendChild(item);
+            });
         }
 
-        // === ENGINE ===
-        const audio = new (window.AudioContext || window.webkitAudioContext)();
-        function beep(f) {
-            let o=audio.createOscillator(), g=audio.createGain();
-            o.frequency.value=f; o.connect(g); g.connect(audio.destination);
-            o.start(); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.2); o.stop(audio.currentTime+0.2);
-        }
+        function showDetails(dateStr, workout) {
+            const modal = document.getElementById('detailsModal');
+            const modalDate = document.getElementById('modalDate');
+            const modalBody = document.getElementById('modalBody');
 
-        function runPhase() {
-            if(session.phase >= schedule.length) { finishSession(); return; }
-            let p = schedule[session.phase];
-            session.time = p.dur;
-            document.getElementById('phase-lbl').innerText = p.lbl;
-            beep(p.lbl.includes("WORK") ? 880 : 440);
+            const date = new Date(dateStr);
+            modalDate.textContent = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
-            clearInterval(session.interval);
-            session.interval = setInterval(() => {
-                if(!session.paused) {
-                    session.time--;
-                    let m = Math.floor(session.time/60);
-                    let s = session.time%60;
-                    document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
-                    if(session.time<=0) { session.phase++; runPhase(); }
-                }
-            }, 1000);
-        }
-
-        function togglePause() {
-            session.paused = !session.paused;
-            let btn = document.getElementById('btn-pause');
-            if(session.paused) {
-                if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.pause();
-                btn.innerText = "RESUME";
+            if (!workout || workout.duration === 0) {
+                modalBody.innerHTML = '<p style="text-align: center; font-size: 1.1em;">No workout recorded for this day</p>';
             } else {
-                if(mediaRecorder && mediaRecorder.state==='paused') mediaRecorder.resume();
-                btn.innerText = "PAUSE";
+                modalBody.innerHTML = `
+                    <div class="detail-section">
+                        <div class="detail-label">Workout Type</div>
+                        <div class="detail-value">${workout.type}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">Duration</div>
+                        <div class="detail-value">${workout.duration} minutes</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">Calories Burned</div>
+                        <div class="detail-value">${workout.calories} kcal</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">Exercises</div>
+                        <div class="detail-content">
+                            <div class="badges">
+                                ${workout.exercises.map(ex => `<span class="badge">${ex}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">Intensity</div>
+                        <div class="detail-value">${workout.duration > 45 ? 'High' : workout.duration > 30 ? 'Medium' : 'Light'}</div>
+                    </div>
+                `;
             }
+
+            modal.classList.add('show');
         }
 
-        function finishSession() {
-            clearInterval(session.interval);
-            if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
-            document.getElementById('phase-lbl').innerText = "COMPLETE";
-            document.getElementById('timer').innerText = "DONE";
-            document.getElementById('active-ctrls').style.display = 'none';
-            document.getElementById('finish-ctrls').style.display = 'grid';
-            beep(1000);
+        function closeModal() {
+            document.getElementById('detailsModal').classList.remove('show');
         }
 
-        function saveVideo() {
-            let a = document.createElement('a');
-            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_v14_${Date.now()}.webm`;
-            document.body.appendChild(a); a.click();
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
     </script>
 </body>
