@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL FLOW V15</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <title>NEURAL FLOW V16</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        /* === V15 FLUID TITANIUM === */
+        /* === V16 TITANIUM RESTORED === */
         :root {
             --bg: #000000;
             --surface: #0a0a0a;
-            --surface-glass: rgba(20, 20, 20, 0.7);
             --border: #222;
             --text-main: #ffffff;
             --text-dim: #666;
-            --accent: #ffffff;
             --action: #007AFF;
             --success: #32d74b;
-            --graph-line: #007AFF;
+            --danger: #FF3B30;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -25,7 +23,7 @@
         body {
             margin: 0; background: var(--bg); color: var(--text-main);
             font-family: 'Inter', sans-serif; height: 100vh; width: 100vw;
-            overflow: hidden; display: flex; opacity: 0; animation: fadeIn 0.6s ease forwards;
+            overflow: hidden; display: flex; opacity: 0; animation: fadeIn 0.5s ease forwards;
         }
         @keyframes fadeIn { to { opacity: 1; } }
 
@@ -49,40 +47,49 @@
         /* RIGHT: CONTROLS */
         #controls {
             flex: 1; max-width: 500px; background: var(--surface);
-            display: flex; flex-direction: column; position: relative;
+            display: flex; flex-direction: column; /* Stack Header + Screen */
+            position: relative;
         }
 
-        /* HEADER */
+        /* HEADER (Fixed Height) */
         .header {
-            height: 70px; display: flex; align-items: center; justify-content: space-between;
+            flex: 0 0 70px; /* FIXED HEIGHT - WONT DISAPPEAR */
+            display: flex; align-items: center; justify-content: space-between;
             padding: 0 25px; border-bottom: 1px solid var(--border);
+            background: var(--surface); z-index: 10;
         }
-        .title-group { display: flex; align-items: center; gap: 10px; }
-        .title { font-weight: 900; letter-spacing: -0.5px; font-size: 1.1rem; }
         
-        /* STREAK BADGE */
+        .title-group { display: flex; align-items: center; gap: 15px; }
+        .title { font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
+        
+        /* STREAK BUTTON */
         .streak-btn {
             background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3);
             color: #ff9f0a; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
-            cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.1s;
+            cursor: pointer; display: flex; align-items: center; gap: 6px; 
+            transition: transform 0.1s;
         }
         .streak-btn:active { transform: scale(0.95); }
 
+        /* ICON BUTTONS */
         .head-btns { display: flex; gap: 10px; }
         .icon-btn {
             width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
-            background: transparent; color: #fff; cursor: pointer; display: flex; 
+            background: #111; color: #fff; cursor: pointer; display: flex; 
             align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;
         }
-        .icon-btn:hover { background: #111; }
+        .icon-btn:hover { background: #222; }
 
-        /* SCREENS */
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
+        /* SCREENS (Take remaining space) */
+        .screen { 
+            flex: 1; display: none; flex-direction: column; 
+            align-items: center; justify-content: center; padding: 20px;
+        }
         .screen.active { display: flex; }
 
         /* HOME SCREEN */
         .big-btn {
-            width: 260px; height: 260px; border-radius: 50%; border: 4px solid #333;
+            width: 240px; height: 240px; border-radius: 50%; border: 4px solid #333;
             background: transparent; color: #fff; font-size: 1.2rem; font-weight: 800;
             cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
             box-shadow: 0 0 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; 
@@ -90,59 +97,54 @@
         }
         .big-btn:hover { border-color: #fff; box-shadow: 0 0 80px rgba(255,255,255,0.1); }
         .big-btn:active { transform: scale(0.95); }
-        .sub-txt { font-size: 0.8rem; color: #666; font-weight: 500; text-transform: uppercase; }
+        .sub-txt { font-size: 0.8rem; color: #666; font-weight: 500; }
 
         /* HUD SCREEN */
-        #timer { font-size: 6rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 50px; }
-        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 400px; }
+        #timer { font-size: 5.5rem; font-weight: 900; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+        #phase-lbl { font-size: 2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 40px; }
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 350px; }
         .act-btn {
-            padding: 25px; border-radius: 14px; border: 1px solid var(--border);
+            padding: 20px; border-radius: 14px; border: 1px solid var(--border);
             background: #111; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer;
         }
         .act-btn.finish { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
 
-        /* === MODALS (Fluid Glass) === */
+        /* === MODALS === */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 100; display: none;
-            backdrop-filter: blur(20px); align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.85); z-index: 100; display: none;
+            backdrop-filter: blur(15px); align-items: center; justify-content: center;
         }
         .modal-card {
-            background: rgba(15, 15, 15, 0.95); width: 95%; max-width: 500px; max-height: 85vh;
+            background: #0a0a0a; width: 90%; max-width: 500px; max-height: 85vh;
             border: 1px solid var(--border); border-radius: 24px; padding: 30px;
-            overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+            overflow-y: auto; box-shadow: 0 50px 100px #000;
             display: flex; flex-direction: column; gap: 20px;
         }
         
-        /* DATA DASHBOARD STYLES */
+        /* DATA VIZ */
         .chart-container {
             width: 100%; height: 150px; background: #111; 
             border-radius: 12px; border: 1px solid #222; position: relative;
-            padding: 10px; box-sizing: border-box;
+            padding: 10px;
         }
         canvas { width: 100%; height: 100%; }
 
         .calendar-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 10px;
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
         }
         .day-node {
             aspect-ratio: 1; background: #1a1a1a; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             font-size: 0.75rem; color: #444; cursor: pointer; border: 1px solid transparent;
-            transition: all 0.2s;
         }
         .day-node.active { background: rgba(50, 215, 75, 0.2); border-color: var(--success); color: var(--success); font-weight: 700; }
-        .day-node:hover { background: #222; }
 
         .detail-box {
-            background: #111; border-radius: 12px; padding: 20px;
+            background: #111; border-radius: 12px; padding: 15px;
             border: 1px solid #222; display: none;
         }
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
-        .detail-row:last-child { margin-bottom: 0; }
-        .d-lbl { color: #666; }
-        .d-val { color: #fff; font-weight: 600; }
+        .d-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
 
         /* SETTINGS UI */
         .set-grp { margin-bottom: 15px; }
@@ -166,25 +168,20 @@
 
     <div id="modal-history" class="modal">
         <div class="modal-card">
-            <h2 style="margin:0;">Neural Logs</h2>
-            <div style="font-size:0.8rem; color:#666;">Performance Timeline</div>
-
-            <div class="chart-container">
-                <canvas id="progressGraph"></canvas>
-            </div>
+            <h2 style="margin:0;">Progress Log</h2>
+            
+            <div class="chart-container"><canvas id="progressGraph"></canvas></div>
 
             <div class="set-grp">
-                <div class="set-lbl">Recent Activity</div>
-                <div class="calendar-grid" id="cal-grid">
-                    </div>
+                <div class="set-lbl">Last 14 Days</div>
+                <div class="calendar-grid" id="cal-grid"></div>
             </div>
 
             <div id="day-details" class="detail-box">
-                <div class="detail-row"><span class="d-lbl">Date</span><span class="d-val" id="d-date">--</span></div>
-                <div class="detail-row"><span class="d-lbl">Mode</span><span class="d-val" id="d-mode">--</span></div>
-                <div class="detail-row"><span class="d-lbl">Duration</span><span class="d-val" id="d-dur">--</span></div>
-                <div class="detail-row"><span class="d-lbl">Completed</span><span class="d-val" id="d-time">--</span></div>
-                <div style="margin-top:10px; pt-10; border-top:1px solid #222; color:#888; font-size:0.8rem;" id="d-ex"></div>
+                <div class="d-row"><span style="color:#666">Date</span><span id="d-date">--</span></div>
+                <div class="d-row"><span style="color:#666">Mode</span><span id="d-mode">--</span></div>
+                <div class="d-row"><span style="color:#666">Time</span><span id="d-dur">--</span></div>
+                <div style="margin-top:5px; pt-5; border-top:1px solid #222; color:#888; font-size:0.8rem;" id="d-ex"></div>
             </div>
 
             <button class="save-btn" onclick="closeModal('modal-history')">CLOSE</button>
@@ -196,7 +193,7 @@
             <h2 style="margin:0;">Settings</h2>
             
             <div class="set-grp">
-                <div class="set-lbl">Timers (Seconds)</div>
+                <div class="set-lbl">Intervals (Seconds)</div>
                 <div class="input-row"><label>Warmup</label><input type="number" id="in-warm" class="num-in" value="240"></div>
                 <div class="input-row"><label>Work</label><input type="number" id="in-work" class="num-in" value="40"></div>
                 <div class="input-row"><label>Rest</label><input type="number" id="in-rest" class="num-in" value="20"></div>
@@ -205,7 +202,7 @@
             </div>
 
             <div class="set-grp">
-                <div class="set-lbl">Input Source</div>
+                <div class="set-lbl">Input</div>
                 <div class="seg-row">
                     <div class="seg-btn active" onclick="setOpt('cam', true, this)">Camera</div>
                     <div class="seg-btn" onclick="setOpt('cam', false, this)">No Cam</div>
@@ -213,7 +210,14 @@
             </div>
 
             <div class="set-grp">
-                <div class="set-lbl">Quality</div>
+                <div class="set-lbl">Mode</div>
+                <div class="seg-row">
+                    <div class="seg-btn active" onclick="setOpt('mode', 'fresh', this)">Fresh</div>
+                    <div class="seg-btn" onclick="setOpt('mode', 'sore', this)">Sore</div>
+                </div>
+            </div>
+             <div class="set-grp">
+                <div class="set-lbl">Recording Quality</div>
                 <div class="seg-row">
                     <div class="seg-btn" onclick="setOpt('qual', 'low', this)">Low</div>
                     <div class="seg-btn" onclick="setOpt('qual', 'mid', this)">Mid</div>
@@ -221,15 +225,18 @@
                 </div>
             </div>
 
-            <div class="set-grp">
-                <div class="set-lbl">Physiology</div>
-                <div class="seg-row">
-                    <div class="seg-btn active" onclick="setOpt('mode', 'fresh', this)">Fresh</div>
-                    <div class="seg-btn" onclick="setOpt('mode', 'sore', this)">Sore</div>
-                </div>
-            </div>
-
             <button class="save-btn" onclick="closeModal('modal-settings')">SAVE CONFIG</button>
+        </div>
+    </div>
+
+    <div id="modal-info" class="modal">
+        <div class="modal-card">
+            <h2 style="margin:0;">Manual</h2>
+            <p style="color:#aaa;">HIIT Protocol for BDNF Production.</p>
+            <div style="background:rgba(255,59,48,0.1); color:#ff3b30; padding:15px; border-radius:10px; font-weight:700; font-size:0.9rem;">
+                ⚠ STREAK WARNING: Do not clear browser cache.
+            </div>
+            <button class="save-btn" onclick="closeModal('modal-info')">OK</button>
         </div>
     </div>
 
@@ -242,13 +249,14 @@
         <div id="controls">
             <div class="header">
                 <div class="title-group">
-                    <div class="title">NEURAL FLOW v15</div>
+                    <div class="title">NEURAL FLOW</div>
                     <button class="streak-btn" onclick="openHistory()">
                         <span>🔥</span> <span id="streak-disp">0</span>
                     </button>
                 </div>
                 <div class="head-btns">
                     <button class="icon-btn" onclick="openModal('modal-settings')">⚙️</button>
+                    <button class="icon-btn" onclick="openModal('modal-info')">?</button>
                 </div>
             </div>
 
@@ -278,39 +286,30 @@
         // === 1. DATA ENGINE ===
         const db = {
             get: () => {
-                const s = localStorage.getItem('nf15_data');
+                const s = localStorage.getItem('nf16_data');
                 return s ? JSON.parse(s) : { streak: 0, logs: {} };
             },
-            save: (data) => localStorage.setItem('nf15_data', JSON.stringify(data)),
-            logSession: (duration, mode) => {
-                let data = db.get();
-                const today = new Date().toISOString().split('T')[0];
-                const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                // Streak Logic
-                if (!data.logs[today]) {
-                    data.streak++;
-                }
-                
-                // Save Log
-                data.logs[today] = {
-                    date: today,
-                    time: now,
-                    dur: duration,
+            save: (d) => localStorage.setItem('nf16_data', JSON.stringify(d)),
+            log: (dur, mode) => {
+                let d = db.get();
+                const date = new Date().toISOString().split('T')[0];
+                if (!d.logs[date]) d.streak++;
+                d.logs[date] = {
+                    date: date,
+                    dur: dur,
                     mode: mode,
-                    ex: mode === 'fresh' ? "Burpees, Mtn Climbers, Jumps" : "Squats, Bridges, Mobility"
+                    ex: mode==='fresh'?"Burpees, Jumps":"Squats, Stretch"
                 };
-                
-                db.save(data);
-                updateStreakUI(data.streak);
+                db.save(d);
+                updateStreak(d.streak);
             }
         };
 
         // === 2. UI LOGIC ===
         let config = { cam: true, qual: 'high', mode: 'fresh' };
         
-        function updateStreakUI(s) { document.getElementById('streak-disp').innerText = s; }
-        updateStreakUI(db.get().streak);
+        function updateStreak(s) { document.getElementById('streak-disp').innerText = s; }
+        updateStreak(db.get().streak);
 
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -321,80 +320,56 @@
             el.classList.add('active');
         }
 
-        // === 3. VISUALIZATION ENGINE (Graph + Calendar) ===
+        // === 3. VISUALIZATION ===
         function openHistory() {
             const data = db.get();
             openModal('modal-history');
-            renderCalendar(data.logs);
-            renderGraph(data.logs);
-        }
-
-        function renderCalendar(logs) {
+            
+            // Calendar
             const grid = document.getElementById('cal-grid');
             grid.innerHTML = '';
-            // Generate last 14 days
             for (let i = 13; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
+                const d = new Date(); d.setDate(d.getDate() - i);
                 const iso = d.toISOString().split('T')[0];
-                const dayNum = d.getDate();
-                
                 const node = document.createElement('div');
-                node.className = logs[iso] ? 'day-node active' : 'day-node';
-                node.innerText = dayNum;
-                if(logs[iso]) {
-                    node.onclick = () => showDetails(logs[iso]);
-                }
+                node.className = data.logs[iso] ? 'day-node active' : 'day-node';
+                node.innerText = d.getDate();
+                if(data.logs[iso]) node.onclick = () => showDetails(data.logs[iso]);
                 grid.appendChild(node);
             }
+
+            // Graph
+            const canvas = document.getElementById('progressGraph');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width; canvas.height = rect.height;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            
+            let pts = [];
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const iso = d.toISOString().split('T')[0];
+                pts.push(data.logs[iso] ? data.logs[iso].dur : 0);
+            }
+            
+            ctx.beginPath(); ctx.strokeStyle='#007AFF'; ctx.lineWidth=3;
+            const sx = canvas.width/6; 
+            const max = Math.max(...pts, 600);
+            pts.forEach((v,i) => {
+                const x = i*sx;
+                const y = canvas.height - ((v/max)*canvas.height*0.8) - 10;
+                if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                ctx.fillStyle=v>0?'#fff':'#333'; ctx.fillRect(x-2,y-2,4,4);
+            });
+            ctx.stroke();
         }
 
         function showDetails(log) {
             document.getElementById('day-details').style.display = 'block';
             document.getElementById('d-date').innerText = log.date;
             document.getElementById('d-mode').innerText = log.mode.toUpperCase();
-            document.getElementById('d-dur').innerText = Math.floor(log.dur/60) + " min";
-            document.getElementById('d-time').innerText = log.time;
+            document.getElementById('d-dur').innerText = Math.floor(log.dur/60) + "m " + (log.dur%60)+"s";
             document.getElementById('d-ex').innerText = log.ex;
-        }
-
-        function renderGraph(logs) {
-            const canvas = document.getElementById('progressGraph');
-            const ctx = canvas.getContext('2d');
-            // Resize
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-
-            // Clear
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            
-            // Get last 7 days data points
-            let points = [];
-            for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const iso = d.toISOString().split('T')[0];
-                points.push(logs[iso] ? logs[iso].dur : 0);
-            }
-
-            // Draw Line
-            ctx.beginPath();
-            ctx.strokeStyle = '#007AFF';
-            ctx.lineWidth = 2;
-            const stepX = canvas.width / 6;
-            const maxY = Math.max(...points, 600); // Scale based on max or 10 mins
-            
-            points.forEach((val, i) => {
-                const x = i * stepX;
-                const y = canvas.height - ((val / maxY) * canvas.height * 0.8) - 10;
-                if(i===0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-                
-                // Draw Dot
-                ctx.fillStyle = val > 0 ? '#fff' : '#333';
-                ctx.fillRect(x-2, y-2, 4, 4);
-            });
-            ctx.stroke();
         }
 
         // === 4. SESSION ENGINE ===
@@ -403,7 +378,6 @@
         let mediaRecorder, chunks=[], blobUrl;
 
         async function startSystem() {
-            // Camera
             if(config.cam) {
                 try {
                     let w=1280, h=720;
@@ -422,8 +396,7 @@
                         mediaRecorder.start();
                     }
                 } catch(e) {
-                    alert("Camera Blocked. No-Cam Mode.");
-                    config.cam = false;
+                    alert("Cam Blocked"); config.cam = false;
                 }
             }
             if(!config.cam) {
@@ -431,7 +404,6 @@
                 document.getElementById('placeholder').style.display='flex';
             }
 
-            // Schedule
             const t = {
                 warm: parseInt(document.getElementById('in-warm').value)||240,
                 work: parseInt(document.getElementById('in-work').value)||40,
@@ -495,12 +467,8 @@
         function finishSession() {
             clearInterval(session.interval);
             if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
+            if(session.elapsed > 60) db.log(session.elapsed, config.mode);
             
-            // Save Data
-            if(session.elapsed > 300) { // Min 5 mins to count
-                db.logSession(session.elapsed, config.mode);
-            }
-
             document.getElementById('phase-lbl').innerText = "COMPLETE";
             document.getElementById('timer').innerText = "DONE";
             document.getElementById('active-ctrls').style.display = 'none';
@@ -510,7 +478,7 @@
 
         function saveVideo() {
             let a = document.createElement('a');
-            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_v15_${Date.now()}.webm`;
+            a.style.display = 'none'; a.href = blobUrl; a.download = `neural_v16_${Date.now()}.webm`;
             document.body.appendChild(a); a.click();
         }
     </script>
